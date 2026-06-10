@@ -1,3 +1,5 @@
+import sys
+sys.path.append("..")
 from pointing import *
 from usainboltz.grammar import *
 from usainboltz.generator import *
