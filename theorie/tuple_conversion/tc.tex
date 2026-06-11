@@ -2,6 +2,8 @@
 \usepackage{amsmath}
 \usepackage{semantic}
 \newtheorem{theorem}{Theorem}
+\newtheorem{proof}{Proof}
+\newtheorem{lemme}{Lemme}
 \newtheorem{definition}{Definition}
 
 \begin{document}
@@ -11,7 +13,7 @@ Les builders font appel à des tuples imbriqués comme arguments, la première q
 
 Quelques éléments de définition:
 \begin{itemize}
-	\item La fonction qui correspond à l'opération de pointage pour une grammaire, et par extension pour une règle est: $Point$.
+	\item On appelle classes auxiliaires les règles correspondant aux RuleNames dans la bibliothèque UsainBoltz.
 	\item La fonction qui correspond à l'opération de dépointage d'un tuple est noté: $Unpoint$, elle prend deux arguments, $Unpoin(t,A)$ avec $A$ la règle associée à la production de $t$. La grammaire est considérée comme sous entendu.
 	\item On note $|t|_z$ la taille d'un tuple $t$ en tant qu'objet d'une classe combinatoire.
 \end{itemize}
@@ -19,7 +21,7 @@ Quelques éléments de définition:
 Quelques éléments de simplification par rapport aux vraix algorithmes point et unpoint:
 \begin{itemize}
 	\item on considère qu'il existe une règle $Zero$ qui correspond à la classe vide, cette classe est utilisée en lieu et place des simplifications qui ont place dans le vrai algorithme Point.
-	\item on ne prend pas en compte le fait que le générateur génère la structure par étape en s'arrêtant au RuleName et que unpoint fait de même. On suppose que les deux gèrent les tuples de la racine jusqu'aux feuilles.
+	\item on ne prend pas en compte le fait que le générateur génère la structure par étape en s'arrêtant aux classes auxiliaires et que unpoint fait de même. On suppose que les deux gèrent les tuples de la racine jusqu'aux feuilles.
 \end{itemize}
 
 La première étape est inspirée des arbres de preuves.
@@ -31,28 +33,71 @@ $$\inference{}{G:Epsilon()\vdash ('epsilon')}[Epsilon]$$
 
 $$\inference{}{G:Atom()\vdash ('z')}[Atom]$$
 
-$$\inference{}{G:Marker('a')\vdash ('a')}[Marker]$$v
+$$\inference{}{G:Marker('a')\vdash ('a')}[Marker]$$
 
-$$\inference{i \in [1; n] \quad G:A_i\vdash t}{G:A_1 + ... + A_n\vdash (i, t)}[Union]$$
+$$\inference{i \in [1; n] \quad G:A_i\vdash t}{G:A_1 + ... + A_n\vdash (i, t)}[Union]\;n\ge 2$$
 
-$$\inference{G:A_1\vdash t_1\quad ... \quad G:A_n \vdash t_n}{G:A_1 \times ... \times A_n\vdash (t_1,...,t_n)}[Product]$$
+$$\inference{G:A_1\vdash t_1\quad ...\quad G:A_n \vdash t_n}{G:A_1 \times ... \times A_n\vdash (t_1,...,t_n)}[Product]\;n\ge 2$$
 
-$$\inference{\text{$A$ est une $RuleName$ associée à la règle $R$ dans $G$} \quad G:R\vdash t}{G:A\vdash t}[Simplifiction]$$
+$$\inference{G:A \vdash t_1\quad ...\quad G:A \vdash t_n}{G:Seq(A) \vdash (t_1,...,t_n)}[Sequence]$$
+
+$$\inference{\text{$A$ est une classe auxiliaire associée à la règle $R$ dans $G$} \quad G:R\vdash t}{G:A\vdash t}[Simplifiction]$$
 \end{definition}
 
 À l'aide entre autre de cette théorie, il faut alors montrer les trois théorèmes suivants:
 \begin{theorem}[Unpoint réalise bien une opération de dépointage]
-Soit $G$, $A$, $t$ une grammaire, une règle et un tuple. $Point(G):Point(A) \vdash t$ si et seulement si $G:A \vdash Unpoint(t,A)$
+Soit $G$, $A$, $t$ une grammaire, une règle et un tuple tel que $A$ apparaisse dans $G$. $G^{\bullet}:A^{\bullet} \vdash t$ si et seulement si $Unpoint(t,A)$ est correctement défini et $G:A \vdash Unpoint(t,A)$.
 \end{theorem}
 
 \begin{theorem}[Unpoint respecte la taille des tuples]
-Soit $G$, $A$, $t$ tel qe $Point(G): Point(A) \vdash t$. Alors $|Unpoint(t,A)|_z = |t|_z$.
+Soit $G$, $A$, $t$ tel qe $G^{\bullet}: A^{\bullet} \vdash t$. Alors $|Unpoint(t,A)|_z = |t|_z$.
 \end{theorem}
 
 \begin{theorem}[Il y a $n$ tuples pointés pour un tuple non pointé de taille $n$]
-Soit $G$, $A$, $t$, tel que $Point(G): Point(A) \vdash t$, alors $|Unpoint^{-1}(\{t\}, A)| = |t|_z$.
+Soit $G$, $A$, $t$, tel que $G^{\bullet}: A^{\bullet} \vdash t$, alors $|Unpoint^{-1}(\{t\}, A)| = |t|_z$.
 \end{theorem}
 
-Des éléments de preuve seront rajoutés par la suite. L'idée est la même pour les trois, une induction sur $A$.
+L'idée de le preuve est la même pour les trois, une induction sur $A$.
+
+On commence par prouver un petit lemme utile:
+
+\begin{lemme}
+Soit $G$, $A$, $t$ une grammaire, une règle et un tuple. On a $G^{\bullet}: A \vdash t$ avec $A$ une règle apparaissant dans $G$ si et seulement si $G: A \vdash t$.
+\end{lemme}
+
+\begin{proof}
+Dans le sens direct, l'opération de pointage fait apparaître de nouvelles règles mais n'en supprime ni n'en modifie aucune. Donc $A$ n'a pas été modifié, donc l'arbre de preuve utilisé pour obtenir que $G^{\bullet}: A\vdash t$ permet de prouver $G: A\vdash t$.
+
+On utilise le même argument dans l'autre sens.
+\end{proof}
+
+\begin{proof}[Unpoint réalise bien une opération de dépointage]
+
+Cas de bases:
+\begin{itemize}
+	\item
+$A = Epsilon()$ donc $A^{\bullet} = Zero()$, on ne peut pas avoir $Zero() \vdash t$ car $Zero()$ n'est pas associé à une règle d'inférence. D'un autre coté, $Unpoint(t, Epsilon())$ lève une exception (donc n'est pas correctement défini).
+
+	\item
+$Marker()$ et $Zero()$ sont très similaires à $Epsilon()$.
+
+	\item
+$A = Atom()$ donc $A^{\bullet} = Atom()$. On a donc $Unpoint(t,A) = t$. Si $G^{\bullet}: Atom() \vdash t$, alors on peut utiliser la seule règle d'inférence faisant intervenir l'atome pour en déduire que $t = ('z')$. Donc, en appliquant cette même règle d'inférence on en déduit que $G: Atom() \vdash t$. Le sens inverse est identique.
+\end{itemize}
+
+Cas récursifs:
+\begin{itemize}
+	\item
+$A = A_1 + ... + A_n$, alors $A^{\bullet} = A_1^{\bullet} + ... + A_n^{\bullet}$. On applique l'unique règle d'inférence associée à l'union, on en déduit que $t = (i,t')$ avec $1 \le i \le n$ et $G^{\bullet}: A_i^{\bullet} \vdash t'$. $A$ apparait dans $G$, donc $A_i$ apparait dans $G$, on peut donc utiliser notre induction. Par hypothèse d'induction, $G: A_i \vdash Unpoint(t', A_i)$ et donc, en appliquant la règle d'inférence pour l'union, $$G: A \vdash (i,Unpoint(t', A_i)) = Unpoint((i,t'), A) = Unpoint(t, A)$$. Le sens réciproque est identique.
+
+	\item
+$A = A_1 \times ... \times A_n$, alors $A^{\bullet} = A_1^{\bullet}\times A_2 \times ... \times A_n + ... + A_1 \times ... \times A_{n-1} \times A_n^{\bullet}$. En appliquant la règle d'inférence pour l'union, on en déduit que $t = (i, t')$ avec $t' = (t_1, ..., t_n)$. Puisque $G^{\bullet}: A_1 \times ... \times A_i^{\bullet} \times ... \times A_n \vdash (t_1, ..., t_n)$, on peut cette fois ci appliquer la règle d'inférence pour le produit. Alors, pour $j\ne i$ $G^{\bullet}: A_j \vdash t_j$, or $A_j$ apparait dans $G$ car $A$ apparait dans $G$, donc on peut appliquer notre lemme pour obtenir que $G: A_j \vdash t_j$. Par hypothèse d'induction, on sait aussi que $G: A_i \vdash Unpoint(t_i, A_i)$, on peut utiliser l'inférence pour le produit pour en déduire que $$G: A_1 \times ... \times A_n \vdash (t_1, ..., Unpoint(t_i, A_i), ..., t_n) = Unpoint(t,A)$$ Le sens réciproque est identique.
+
+	\item
+Si $A$ est une classe auxiliaire, la seule règle appliquable est la simplifcation, on a donc $A^{\bullet}: R \in G^{\bullet}$, or $A$ apparait dans $G$. Par définition du pointage, il existe $T$ tel que $T^{\bullet} = R$ et $A: T\in G$.
+Par hypothèse, $G^{\bullet}: A^{\bullet} \vdash t$ donc $G^{\bullet}: R \vdash T$. On conclut par hypothèse d'induction et application de la règle de simplification. Le sens réciproque est identique.
+\end{itemize}
+
+\end{proof}
 
 \end{document}
