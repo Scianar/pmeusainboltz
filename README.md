@@ -8,7 +8,7 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 (Fait)
 
 - Gérer les arguments du générateur pour la construction de l'oracle.
-(Fait, reste à tester proprement pour les séquences)
+(Fait)
 
 - Retravailler les builders pour réaliser moins d'opérations à l'exécution des builders.
 (Fait)

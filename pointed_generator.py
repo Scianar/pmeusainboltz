@@ -120,7 +120,7 @@ def tc_sequence_rule_builder(seq: Seq, point_to_empty: Set[RuleName]):
 	"""
 	sub_builder = tc_rule_builder(seq.arg, point_to_empty)
 	def builder(tp: tuple):
-		left_seq, pointeg_arg, right_seq = tp
+		left_seq, pointed_arg, right_seq = tp
 		return left_seq + [sub_builder(pointed_arg)] + right_seq
 	return builder
 
@@ -191,9 +191,11 @@ class PointedGenerator(Generator):
 
 	Add the possibility to point the generator. Can only be pointed when initialised
 	"""
-	def __init__(self, grammar: Grammar, rule_name = None, singular = None, expectations = None, oracle = None, k:int = 1):
+	def __init__(self, grammar: Grammar, rule_name: RuleName , singular = None, expectations = None, oracle = None, k:int = 1):
 		"""
-		arguments are identical to the one for the generator. One optional argument k is added.
+		arguments are almost identical to the one for the generator.
+		The rule_name must be specified.
+		One optional argument k is added.
 		k is the number of time the generator must be pointed, by default k = 1. k can't be modified
 		after initialising the generator.
 		"""
@@ -207,10 +209,9 @@ class PointedGenerator(Generator):
 		#Refers to the set of rulenames which come from the non pointed grammar.
 
 		self._point(k)
+		rule_name = pointed_rulename(rule_name, k)
 
 		super().__init__(self.grammar, rule_name, singular, expectations, oracle)
-
-		self.rule_name = pointed_rulename(self.rule_name, k)
 
 	def _point(self, k:int = 1) -> Grammar:
 		"""

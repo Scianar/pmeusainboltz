@@ -9,7 +9,7 @@ from usainboltz.grammar import *
 from usainboltz.generator import *
 from pointed_generator import *
 from usainboltz.generator import rng_seed
-rng_seed(163556)
+rng_seed(1635)
 
 def print_test_grammar(g, g_pointed):
 	print("\n\nGrammar of G:")
@@ -21,7 +21,7 @@ def print_test_grammar(g, g_pointed):
 def print_test_result(g, result):
 	print("\n\nGrammar of G")
 	print(g.rules)
-	print("Element of G")
+	print("Element of G:")
 	print(result)
 	print("\n\n\n")
 
@@ -62,16 +62,16 @@ B = RuleName("B")
 T = RuleName("T")
 
 bin_tree = Grammar({B: e + z*B*B})
-bin_tree_gen = PointedGenerator(bin_tree, B)
+bin_tree_gen = PointedGenerator(bin_tree, B, expectations = {z:100})
 bin_tree_gen.set_builder(B, union_builder(build_bin_leaf, build_bin_node))
 res	= bin_tree_gen.sample((1,100))
 print_test_result(bin_tree, res.obj)
 
 
 tree = Grammar({T: z*Seq(T)})
-tree_gen = PointedGenerator(tree, T)
+tree_gen = PointedGenerator(tree, T, expectations = {z:100})
 print_test_grammar(tree, tree_gen.grammar)
 tree_gen.set_builder(T, build_node)
 res = tree_gen.sample((1,100))
-print_test_result(res.obj)
+print_test_result(tree, res.obj)
 
