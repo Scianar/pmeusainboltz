@@ -8,6 +8,7 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 (Fait)
 
 - Gérer les arguments du générateur pour la construction de l'oracle.
+(Fait, non proprement testé)
 
 - Retravailler les builders pour réaliser moins d'opérations à l'exécution des builders.
 
@@ -16,5 +17,6 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 - Imaginer et implémenter des tests.
 
 - Construire la théorie derrière la conversion des tuples.
+(Entamé)
 
 - (Mise en place de MSET et cycle non étiquetée)

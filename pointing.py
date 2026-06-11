@@ -65,7 +65,7 @@ def point_rulename(r: RuleName, point_to_empty: Set[RuleName]) -> RuleName:
 	"""
 	if r in point_to_empty:
 		return None
-	return RuleName(pointed_rulename(r.name))
+	return pointed_rulename(r)
 
 def point_union_rule(u: Union, point_to_empty: Set[RuleName]) -> PointedRule:
 	"""
@@ -215,11 +215,12 @@ def order_to_point(g: Grammar) -> List[RuleName]:
 
 #Todo: rework the function to return a dictionnary whith values as rulenames which have been created
 #by pointing and which did not appear before in g and keys as the rulenames which point to their key.
-def point_grammar(g: Grammar) -> (Grammar, Set[RuleName]):
+def point_grammar(g: Grammar) -> (Grammar, Set[RuleName], Set[RuleName]):
 	"""
 	Return the pointed grammar.
 	Return an associated set which corresponds to all rulenames which pointed version appear in the grammar
 	and didn't appear before. 
+	Return an associated set which corresponds to rulenames which when pointed, lead to empty class.
 
 	A pointed grammar is composed of all intermediates rules
 	present in the original grammar and their pointed version.
@@ -239,6 +240,6 @@ def point_grammar(g: Grammar) -> (Grammar, Set[RuleName]):
 			point_to_empty.add(rulename)
 		else:
 			pointed_rules[rulename_pointed] = new_rule
-			added_unpointed.add(rulename_pointed)
+			added_unpointed.add(rulename)
 
-	return (Grammar(pointed_rules, labelled = g.labelled), added_unpointed)
+	return (Grammar(pointed_rules, labelled = g.labelled), added_unpointed, point_to_empty)
