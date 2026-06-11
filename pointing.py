@@ -25,12 +25,21 @@ PointedSuffix = "1b38a28af420e18b5b1687cd816ca5dd"
 #For now, the suffix is _P for readability reasons
 PointedSuffix = "_P"
 
-def pointed_rulename(name: str) -> str:
+def pointed_rule_name(name: str, k:int = 1) -> str:
 	"""
 	Given a rule name, return its pointed name.
-	"""
-	return name + PointedSuffix
 
+	If k is specified, repeat the operation k times.
+	"""
+	return name + PointedSuffix*k
+
+def pointed_rulename(r: RuleName, k:int = 1) -> RuleName:
+	"""
+	Given a rulename, return the pointed rulename.
+
+	If k is specified, repeat the operation k times.
+	"""
+	return RuleName(pointed_rule_name(r.name, k))
 
 def union_from_args(union_args: List[Rule]) -> PointedRule:
 	"""
@@ -204,24 +213,32 @@ def order_to_point(g: Grammar) -> List[RuleName]:
 
 #---------------------------------------------------------------
 
+#Todo: rework the function to return a dictionnary whith values as rulenames which have been created
+#by pointing and which did not appear before in g and keys as the rulenames which point to their key.
 def point_grammar(g: Grammar) -> (Grammar, Set[RuleName]):
 	"""
 	Return the pointed grammar.
-	Return an associated set which corresponds to all rulenames which
-	point to an empty class.
+	Return an associated set which corresponds to all rulenames which pointed version appear in the grammar
+	and didn't appear before. 
 
 	A pointed grammar is composed of all intermediates rules
 	present in the original grammar and their pointed version.
 	"""
 	pointed_rules = g.rules.copy()
 	point_to_empty = set()
+	added_unpointed = set()
 
 	for rulename in order_to_point(g):
+		rulename_pointed = pointed_rulename(rulename)
+		if rulename_pointed in pointed_rules.keys():
+			continue #The rulename has already been pointed and added to g in an anterior call to point_grammar.
 		rule = g.rules[rulename]
+
 		new_rule = point_rule(rule, point_to_empty)
 		if new_rule is None: #The rule associated to rulename points to the empty class. 
 			point_to_empty.add(rulename)
 		else:
-			pointed_rules[RuleName(pointed_rulename(rulename.name))] = new_rule
+			pointed_rules[rulename_pointed] = new_rule
+			added_unpointed.add(rulename_pointed)
 
-	return Grammar(pointed_rules, labelled = g.labelled)
+	return (Grammar(pointed_rules, labelled = g.labelled), added_unpointed)

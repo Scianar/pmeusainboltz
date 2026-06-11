@@ -116,53 +116,77 @@ def tc_rule(r: Rule, tp: tuple) -> tuple:
 			print(r)
 			raise Exception("Not yet implemented")
 
-def pointed_builder(non_pointed_rule: Rule, original_builder):
-	"""
-	A construction builder for an unique pointed rulename. See pointed_builders for more information.
-	non_pointed_rule must correspond to rule associted with the unpointed rulename in the grammar.
-	original_builder: the builder which is normally used on the non pointed class. Can be the default
-	one or the one specified by the user.
-	"""
-	def build(tp: tuple):
-		
-		return original_builder(tc_rule(non_pointed_rule, tp))
-	return build
-
-def pointed_builders(g: Generator):
+def pointed_builder(non_pointed_rule: Rule):
 	"""
 	Buiders for pointed class are different from the normal builders.
 	The tuple structure for pointed class is different from the one for their associated non pointed class.
 	To always return a tuple for non pointed class, all pointed class must have a special builder.
-
-	Will search for the pointed rules inside the generator.
 	"""
-	for rulename in sorted(g.grammar.rules.keys(), key = lambda rulename: len(rulename.name)):
-		name = rulename.name
-		if name.endswith(PointedSuffix):
-			unpointed_name = name[:len(name)-len(PointedSuffix)]
-			unpointed_rulename = RuleName(unpointed_name)
-			builder = pointed_builder(g.grammar.rules[unpointed_rulename], g.get_builder(unpointed_rulename))
-			g.set_builder(rulename, builder)
+	def build(tp: tuple):
+		return tc_rule(non_pointed_rule, tp)
+	return build
 
-def point_generator(g: Generator, k:int = 1) -> Generator:
+
+class PointedGenerator(Generator):
 	"""
-	Return a new generator which has been pointed k times.
-	Assume that all necessary builders have already been provided.
+	Class inherited from Generator from usainboltz.
+
+	Add the possibility to point the generator. Can only be pointed when initialised
 	"""
-	pointed_grammar = g.grammar
-	for _ in range(k):
-		pointed_grammar = point_grammar(pointed_grammar)
-	pointed_g = Generator(
-		pointed_grammar,
-		RuleName(g.rule_name.name + PointedSuffix * k), 
-		#The rule to generate is the pointed version of the one to normally generate.
-		None,
-		None,
-		None)
 
-	for rulename in g.grammar.rules.keys():
-		builder = g.get_builder(rulename)
-		pointed_g.set_builder(rulename, builder)
+	def __init__(self, grammar: Grammar, *args, k:int = 1):
+		"""
+		arguments are identical to the one for the generator. One optional argument k is added.
+		k is the number of time the generator must be pointed, by default k = 1. k can't be modified
+		after initialising the generator.
+		"""
+		self.nb_pointed = 0
+		self.default_pointed_builders = {}
+		#The default pointed builders refer to the builders without
+		#a builder specified by the user.
 
-	pointed_builders(pointed_g)
-	return pointed_g
+		self.non_pointed_rulenames = set(self.grammar.rules.keys())
+		#Refers to the set of rulenames which come from the non pointed grammar.
+
+		self._point(grammar, k)
+
+		super().__init__(*args)
+
+		self.rule_name = pointed_rulename(self.rule_name, k)
+
+	def _point(self, grammar: Grammar, k:int = 1) -> Grammar:
+		"""
+		Point the generator k times (by default k=1). Can only be called before initialisation of the super class.
+
+		Return the pointed grammar.
+		"""
+		for i in range(0, k):
+			grammar = self._point_once(grammar)
+			self.nb_pointed += 1
+		return grammar
+
+	def _point_once(self, grammar: Grammar):
+		"""
+		Point the generator once. Can only be called before initialisation of the super class.
+		"""
+		(grammar, added_pointed) = point_grammar(grammar)
+		for rule in added_pointed:
+			pointed_rule_name = pointed_rulename(rule.name)
+			new_builder = pointed_builder(grammar.rules[unpointed_pointed_rulename])
+
+			self.default_pointed_builders[pointed_rule_name] = new_builder
+		return grammar
+
+	def set_builder(self, non_terminal:RuleName, builder):
+		"""
+		Almost identical to the Generator.set_builder function.
+
+		Also add corresponding builders for pointed non_terminal
+		"""
+		super().set_builder(non_terminal, builder)
+
+		for _ in range(self.nb_pointed):
+			non_terminal = pointed_rulename(non_terminal)
+			def composed_builder(tp: tuple):
+				return builder(self.default_pointed_builders[non_terminal](tp))
+			super().set_builder(non_terminal, composed_builder)

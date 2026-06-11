@@ -1,0 +1,58 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{semantic}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+
+\begin{document}
+Éléments de théorie pour la construction des builders. Le but de ce petit article est de donner la base de la théorie pour prouver la correction de l'algorithme qui construit les builders pointés.
+
+Les builders font appel à des tuples imbriqués comme arguments, la première question est donc de savoir à quelles conditions un tuple peut-être considéré comme valide pour une règle. Il faudra ensuite montrer que des tuples pointés sont envoyés par l'algorithme vers des tuples non pointés. Enfin, il faut s'assurer que $n$ tuples pointés de taille $n$ (en tant qu'objet d'une classe combinatoire) sont envoyés vers un seul tuple non pointé de taille $n$. Cela devrait suffire.
+
+Quelques éléments de définition:
+\begin{itemize}
+	\item La fonction qui correspond à l'opération de pointage pour une grammaire, et par extension pour une règle est: $Point$.
+	\item La fonction qui correspond à l'opération de dépointage d'un tuple est noté: $Unpoint$, elle prend deux arguments, $Unpoin(t,A)$ avec $A$ la règle associée à la production de $t$. La grammaire est considérée comme sous entendu.
+	\item On note $|t|_z$ la taille d'un tuple $t$ en tant qu'objet d'une classe combinatoire.
+\end{itemize}
+
+Quelques éléments de simplification par rapport aux vraix algorithmes point et unpoint:
+\begin{itemize}
+	\item on considère qu'il existe une règle $Zero$ qui correspond à la classe vide, cette classe est utilisée en lieu et place des simplifications qui ont place dans le vrai algorithme Point.
+	\item on ne prend pas en compte le fait que le générateur génère la structure par étape en s'arrêtant au RuleName et que unpoint fait de même. On suppose que les deux gèrent les tuples de la racine jusqu'aux feuilles.
+\end{itemize}
+
+La première étape est inspirée des arbres de preuves.
+
+\begin{definition}[Tuple acceptable pour une règle.]
+Pour $G$ une grammaire, $A$ une règle de cette grammaire, $t$ un tuple, on dit que $t$ est acceptable pour $A$ et on note $G:A \vdash t$ si cette proposition peut être déduite des règles d'inférences que nous allons lister.
+
+$$\inference{}{G:Epsilon()\vdash ('epsilon')}[Epsilon]$$
+
+$$\inference{}{G:Atom()\vdash ('z')}[Atom]$$
+
+$$\inference{}{G:Marker('a')\vdash ('a')}[Marker]$$v
+
+$$\inference{i \in [1; n] \quad G:A_i\vdash t}{G:A_1 + ... + A_n\vdash (i, t)}[Union]$$
+
+$$\inference{G:A_1\vdash t_1\quad ... \quad G:A_n \vdash t_n}{G:A_1 \times ... \times A_n\vdash (t_1,...,t_n)}[Product]$$
+
+$$\inference{\text{$A$ est une $RuleName$ associée à la règle $R$ dans $G$} \quad G:R\vdash t}{G:A\vdash t}[Simplifiction]$$
+\end{definition}
+
+À l'aide entre autre de cette théorie, il faut alors montrer les trois théorèmes suivants:
+\begin{theorem}[Unpoint réalise bien une opération de dépointage]
+Soit $G$, $A$, $t$ une grammaire, une règle et un tuple. $Point(G):Point(A) \vdash t$ si et seulement si $G:A \vdash Unpoint(t,A)$
+\end{theorem}
+
+\begin{theorem}[Unpoint respecte la taille des tuples]
+Soit $G$, $A$, $t$ tel qe $Point(G): Point(A) \vdash t$. Alors $|Unpoint(t,A)|_z = |t|_z$.
+\end{theorem}
+
+\begin{theorem}[Il y a $n$ tuples pointés pour un tuple non pointé de taille $n$]
+Soit $G$, $A$, $t$, tel que $Point(G): Point(A) \vdash t$, alors $|Unpoint^{-1}(\{t\}, A)| = |t|_z$.
+\end{theorem}
+
+Des éléments de preuve seront rajoutés par la suite. L'idée est la même pour les trois, une induction sur $A$.
+
+\end{document}

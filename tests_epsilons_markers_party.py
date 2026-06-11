@@ -32,7 +32,7 @@ G = RuleName("G")
 
 g_direct = Grammar({A: e + z*a*z})
 
-g_direct_pointed = point_grammar(g_direct)
+(g_direct_pointed,_) = point_grammar(g_direct)
 print_test(g_direct, g_direct_pointed)
 
 g_disappearing_class = Grammar({
@@ -41,7 +41,7 @@ g_disappearing_class = Grammar({
 	C: b*A
 	})
 
-g_disappearing_class_pointed = point_grammar(g_disappearing_class)
+(g_disappearing_class_pointed,_) = point_grammar(g_disappearing_class)
 print_test(g_disappearing_class, g_disappearing_class_pointed)
 
 g_complex_dependance = Grammar({
@@ -53,5 +53,5 @@ g_complex_dependance = Grammar({
 	G: E+F+A+B+D,
 	D: e*(a+e),
 	})
-g_complex_dependance_pointed = point_grammar(g_complex_dependance)
+(g_complex_dependance_pointed,_) = point_grammar(g_complex_dependance)
 print_test(g_complex_dependance, g_complex_dependance_pointed)
