@@ -58,6 +58,7 @@ def tc_union_rule_builder(u: Union, point_to_empty: Set[RuleName]):
 			return (pointed_index[0], sub_builder(tp))
 	else:
 		def builder(tp: tuple):
+			print("REACHED")
 			(chosen_index, chosen_tp) = tp
 			sub_builder = sub_builders[chosen_index]
 			return (pointed_index[chosen_index], sub_builder(chosen_tp))
@@ -164,7 +165,7 @@ class PointedGenerator(Generator):
 
 	Add the possibility to point the generator. Can only be pointed when initialised
 	"""
-	def __init__(self, grammar: Grammar, *args, k:int = 1):
+	def __init__(self, grammar: Grammar, rule_name = None, singular = None, expectations = None, oracle = None, k:int = 1):
 		"""
 		arguments are identical to the one for the generator. One optional argument k is added.
 		k is the number of time the generator must be pointed, by default k = 1. k can't be modified
@@ -181,7 +182,7 @@ class PointedGenerator(Generator):
 
 		self._point(k)
 
-		super().__init__(self.grammar, *args)
+		super().__init__(self.grammar, rule_name, singular, expectations, oracle)
 
 		self.rule_name = pointed_rulename(self.rule_name, k)
 

@@ -1,47 +1,77 @@
-import sys
-sys.path.append("..")
+"""
+Set of tests involving trees.
+
+For some print the grammar and pointed grammar. For all, print the result for a pointed tree.
+"""
+
 from pointing import *
 from usainboltz.grammar import *
 from usainboltz.generator import *
 from pointed_generator import *
 from usainboltz.generator import rng_seed
+rng_seed(163556)
 
+def print_test_grammar(g, g_pointed):
+	print("\n\nGrammar of G:")
+	print(g.rules)
+	print("Pointed grammar of G:")
+	print(g_pointed.rules)
+	print("\n\n\n")
 
-class BinaryTree:
-	def __init__(self, left, right):
-		self.left = left
-		self.right = right
+def print_test_result(g, result):
+	print("\n\nGrammar of G")
+	print(g.rules)
+	print("Element of G")
+	print(result)
+	print("\n\n\n")
 
-	def print(self, t):
-		if self.left == None:
-			left = ""
-		else:
-			left = self.left.print(t+1)
-		if self.right == None:
-			right = ""
-		else:
-			right = self.right.print(t+1)
-		return left + t*"\t" + "Z\n" + right
+class Leaf:
+	def print(self, _):
+		return ""
+
+class Tree:
+	def __init__(self, children):
+		self.children = children
+
+	def print(self, t:int):
+		result = ""
+		branch = "|\t"*(t-1)
+		if t>0:
+			branch += "|-----"
+			branch += "\t"
+		result += branch+"Z\n"
+		result += "".join([child.print(t+1) for child in self.children])
+		return result
 
 	def __repr__(self):
 		return self.print(0)
 
-def build_leaf(_):
-	return None
+def build_bin_leaf(_):
+	return Leaf()
+
+def build_bin_node(tupl):
+	z, left, right = tupl
+	return Tree([left, right])
 
 def build_node(tupl):
-	z, left, right = tupl
-	return BinaryTree(left, right)
-
+	(_, children) = tupl
+	return Tree(children)
 
 e,z = Epsilon(), Atom()
 B = RuleName("B")
+T = RuleName("T")
 
-grammar = Grammar({B: e + z*B*B})
-generator = PointedGenerator(grammar, B)
-print(generator.grammar)
-generator.set_builder(B, union_builder(build_leaf, build_node))
-#generator = point_generator(generator)
-#print(generator.grammar)
-res	= generator.sample((1,100))
-print(res.obj)
+bin_tree = Grammar({B: e + z*B*B})
+bin_tree_gen = PointedGenerator(bin_tree, B)
+bin_tree_gen.set_builder(B, union_builder(build_bin_leaf, build_bin_node))
+res	= bin_tree_gen.sample((1,100))
+print_test_result(bin_tree, res.obj)
+
+
+tree = Grammar({T: z*Seq(T)})
+tree_gen = PointedGenerator(tree, T)
+print_test_grammar(tree, tree_gen.grammar)
+tree_gen.set_builder(T, build_node)
+res = tree_gen.sample((1,100))
+print_test_result(res.obj)
+

@@ -8,14 +8,15 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 (Fait)
 
 - Gérer les arguments du générateur pour la construction de l'oracle.
-(Fait, non proprement testé)
+(Fait, reste à tester proprement pour les séquences)
 
 - Retravailler les builders pour réaliser moins d'opérations à l'exécution des builders.
-(Fait, non proprement testé)
+(Fait)
 
 - Rajout des sets et cycles étiquetés.
 
 - Imaginer et implémenter des tests.
+(En cours, il y aura besoin d'aide pour certains tests.)
 
 - Construire la théorie derrière la conversion des tuples.
 (Entamé)
