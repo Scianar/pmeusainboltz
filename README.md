@@ -11,6 +11,7 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 (Fait, non proprement testé)
 
 - Retravailler les builders pour réaliser moins d'opérations à l'exécution des builders.
+(Fait, non proprement testé)
 
 - Rajout des sets et cycles étiquetés.
 

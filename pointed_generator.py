@@ -21,99 +21,128 @@ from usainboltz.generator import Generator
 from typing import List, Union as TypeUnion
 from pointing import *
 
-def tc_union_rule(u: Union, tp: tuple, point_to_empty: Set[RuleName]) -> PointedRule:
+def identity_builder(tp: tuple):
+	"""
+	Always return the entry value.
+	"""
+	return tp
+
+def compute_pointed_index(rules: List[Rule], point_to_empty: Set[RuleName]) -> List[int]:
+	"""
+	Build a list which associate to each index i, the ith element of rules which is not pointed
+	to an empty class.
+	"""
+	pointed_index = []
+	for (i,rule) in enumerate(rules):
+		pointed_rule = point_rule(rule, point_to_empty)
+		if not pointed_rule is None:
+			pointed_index.append(i)
+	return pointed_index
+
+def tc_union_rule_builder(u: Union, point_to_empty: Set[RuleName]):
 	"""
 	Some elements in the union might disappear (for instance epsilon + z gives z when pointed).
 	Therefore, the resulting tuple of an union migth differ.
 	"""
-	#Todo: implement a more efficient way to know if a rule is empty.
-	#Also, for knowing if an union has been reduced.
-	pointed_index = []
-	for (i,arg) in enumerate(u.args):
-		pointed_arg = point_rule(arg, point_to_empty)
-		if not pointed_arg is None: #In this case, an element in the union has disappeared in the pointed union.
-			pointed_index.append(i)
+	pointed_index = compute_pointed_index(u.args, point_to_empty)
 
 	if len(pointed_index) == 0: #This case should be impossible.
-		raise Exception("The generator has outputed an element from an empty pointed class.")
+		raise Exception("In theory, empty rules shouldn't have an associated builder.")
+
+	sub_builders = list(
+		map(lambda rule_id: tc_rule_builder(u.args[rule_id], point_to_empty), pointed_index)
+		)
 	if len(pointed_index) == 1: #The union has been removed during the pointing.
-		return (pointed_index[0], tc_rule(u.args[pointed_index[0]], tp, point_to_empty))
-	
-	(chosen_index, chosen_rule) = tp
+		sub_builder = sub_builders[0]
+		def builder(tp: tuple):
+			return (pointed_index[0], sub_builder(tp))
+	else:
+		def builder(tp: tuple):
+			(chosen_index, chosen_tp) = tp
+			sub_builder = sub_builders[chosen_index]
+			return (pointed_index[chosen_index], sub_builder(chosen_tp))
+	return builder
 
-	real_index = pointed_index[chosen_index]
-	return (real_index, tc_rule(u.args[real_index],chosen_rule,point_to_empty))
-
-def tc_product_rule(p: Product, tp:tuple, point_to_empty: Set[RuleName]) -> PointedRule:
+def tc_product_rule_builder(p: Product, point_to_empty: Set[RuleName]):
 	"""
 	The problemen encountered is identical to the one in tc_union_rule.
 	Some elements might disappear in the resulting pointed union.
 	"""
-	pointed_index = []
-	for (i,arg) in enumerate(p.args):
-		pointed_arg = point_rule(arg, point_to_empty)
-		if not pointed_arg is None: #In this case, an element in the product has disappeared in the pointed union.
-			pointed_index.append(i)
+	pointed_index = compute_pointed_index(p.args, point_to_empty)
 
 	if len(pointed_index) == 0: #This case should be impossible.
-		raise Exception("The generator has outputed an element from an empty pointed class.")
+		raise Exception("In theory, empty rules shouldn't have an associated builder.")
 	
+
+	sub_builders = list(
+		map(lambda rule_id: tc_rule_builder(p.args[rule_id], point_to_empty), pointed_index)
+		)
+
 	#When pointing a product, a product rule will always be produced, not always in an union.
+	#The product tuple has only one element modified, the one corresponding to the pointed rule.
 	if len(pointed_index) == 1: #The union has been removed during the pointing.
 		real_index = pointed_index[0]
-		product_tp = tp
-	else:	
-		(chosen_index, chosen_rule) = tp
-		real_index = pointed_index[chosen_index]
-		product_tp = chosen_rule
+		sub_builder = sub_builders[0]
+		def builder(tp: tuple):
+			result_tp = tp[:real_index] + (sub_builder(tp[real_index]),) + tp[real_index+1:]
+			return result_tp
+	else:
+		def builder(tp: tuple):
+			(chosen_index, chosen_tp) = tp
+			real_index = pointed_index[chosen_index]
+			sub_builder = sub_builders[chosen_index]
+			result_tp = chosen_tp[:real_index] + (sub_builder(chosen_tp[real_index]),) + chosen_tp[real_index+1:]
+			return result_tp
 
-	#The product tuple has only one element modified, the one corresponding to the pointed rule.
-	result_tp = product_tp[:real_index] + (tc_rule(p.args[real_index], product_tp[real_index], point_to_empty),) + product_tp[real_index+1:]
-	return result_tp
+	return builder
 
-def tc_atom_rule(z: Atom, tp: tuple, point_to_empty: Set[RuleName]) -> tuple:
+def tc_atom_rule_builder(z: Atom, point_to_empty: Set[RuleName]):
 	"""
 	Given an atom, the pointed tuple is strictly identical to a non pointed tuple.
 	"""
-	return tp
+	return identity_builder
 
-def tc_rulename(r: RuleName, tp: tuple, point_to_empty: Set[RuleName]) -> tuple:
+def tc_rulename_builder(r: RuleName, point_to_empty: Set[RuleName]):
 	"""
 	Given a rulename, the corresponding tuple should be identical to a non pointed tuple.
 	Indeed, if the rulename is pointed, the tuple has been build using the builder for pointed associated rule in the grammar.
 	Otherwise nothing is changed.
 	"""
-	return tp
+	return identity_builder
 
-def tc_sequence_rule(seq: Seq, tp: tuple, point_to_empty: Set[RuleName]) -> tuple:
+def tc_sequence_rule_builder(seq: Seq, point_to_empty: Set[RuleName]):
 	"""
 	A pointed sequence is a product: Seq(A)*pointed(A)*Seq(A).
 	To unpoint the sequence, we just need to "flatten" the tuple.
 	"""
-	left_seq, pointeg_arg, right_seq = tp
-	return left_seq + [tc_rule(seq.arg, pointed_arg, point_to_empty)] + right_seq
+	sub_builder = tc_rule_builder(seq.arg, point_to_empty)
+	def builder(tp: tuple):
+		left_seq, pointeg_arg, right_seq = tp
+		return left_seq + [sub_builder(pointed_arg)] + right_seq
+	return builder
 
-def tc_rule(r: Rule, tp: tuple, point_to_empty: Set[RuleName]) -> tuple:
+def tc_rule_builder(r: Rule, point_to_empty: Set[RuleName]):
 	"""
-	Convert the tuple associated to the pointed rule obtained from r to a tuple associated with r.
+	Create a builder which convert the tuple associated to the pointed rule
+	obtained from r to a tuple associated with r.
 
 	point_to_empty: set of rulenames which when pointed are the empty class.
 	"""
 	match r:
 		case Union():
-			return tc_union_rule(r, tp, point_to_empty)
+			return tc_union_rule_builder(r, point_to_empty)
 		case Product():
-			return tc_product_rule(r, tp, point_to_empty)
+			return tc_product_rule_builder(r, point_to_empty)
 		case Epsilon():
-			raise Exception("The generator has outputed an element from an empty pointed class.")
+			raise Exception("In theory, empty rules shouldn't have an associated builder.")
 		case Marker():
-			raise Exception("The generator has outputed an element from an empty pointed class.")
+			raise Exception("In theory, empty rules shouldn't have an associated builder.")
 		case Atom():
-			return tc_atom_rule(r, tp, point_to_empty)
+			return tc_atom_rule_builder(r, point_to_empty)
 		case RuleName():
-			return tc_rulename(r, tp, point_to_empty)
+			return tc_rulename_builder(r, point_to_empty)
 		case Seq():
-			return tc_sequence_rule(r, tp, point_to_empty)
+			return tc_sequence_rule_builder(r, point_to_empty)
 		case _:
 			#Todo: finish each case.
 			print(r)
@@ -127,10 +156,7 @@ def pointed_builder(non_pointed_rule: Rule, point_to_empty: Set[RuleName]):
 
 	point_to_empty: set of rulenames which when pointed are the empty class.
 	"""
-	def build(tp: tuple):
-		return tc_rule(non_pointed_rule, tp, point_to_empty)
-	return build
-
+	return tc_rule_builder(non_pointed_rule, point_to_empty)
 
 class PointedGenerator(Generator):
 	"""
@@ -138,7 +164,6 @@ class PointedGenerator(Generator):
 
 	Add the possibility to point the generator. Can only be pointed when initialised
 	"""
-
 	def __init__(self, grammar: Grammar, *args, k:int = 1):
 		"""
 		arguments are identical to the one for the generator. One optional argument k is added.
