@@ -15,7 +15,9 @@ from usainboltz.grammar import (
 	Atom,
 	Epsilon,
 	Grammar,
-	Seq
+	Seq,
+	Set,
+	Cycle
 )
 from usainboltz.generator import Generator
 from typing import List, Union as TypeUnion
@@ -122,6 +124,26 @@ def tc_sequence_rule_builder(seq: Seq, point_to_empty: Set[RuleName]):
 		return left_seq + [sub_builder(pointed_arg)] + right_seq
 	return builder
 
+def tc_set_builder(set: Set, point_to_empty: Set[RuleName]):
+	"""
+	A pointed set is a product Pointed(A)*Set(A).
+	"""
+	sub_builder = tc_rule_builder(set.arg, point_to_empty)
+	def builder(tp: tuple):
+		pointed_arg, set = tp
+		return [sub_builder(pointed_arg)] + set
+	return builder
+
+def tc_cycle_builder(cycle: Cycle, point_to_empty: Set[RuleName]):
+	"""
+	A pointed cycle is a product Pointed(A)*Seq(A).
+	"""
+	sub_builder = tc_rule_builder(cycle.arg, point_to_empty)
+	def builder(tp: tuple):
+		pointed_arg, seq = tp
+		return [sub_builder(pointed_arg)] + seq
+	return builder
+
 def tc_rule_builder(r: Rule, point_to_empty: Set[RuleName]):
 	"""
 	Create a builder which convert the tuple associated to the pointed rule
@@ -144,6 +166,10 @@ def tc_rule_builder(r: Rule, point_to_empty: Set[RuleName]):
 			return tc_rulename_builder(r, point_to_empty)
 		case Seq():
 			return tc_sequence_rule_builder(r, point_to_empty)
+		case Set():
+			return tc_set_builder(r, point_to_empty)
+		case Cycle():
+			return tc_cycle_rule_builder(r, point_to_empty)
 		case _:
 			#Todo: finish each case.
 			print(r)
