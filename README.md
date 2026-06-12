@@ -22,4 +22,6 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 - Construire la théorie derrière la conversion des tuples.
 (Entamé)
 
+- Ajout de la gestion des arguments pour certaines constructions de classes.
+
 - (Mise en place de MSET et cycle non étiquetée)
