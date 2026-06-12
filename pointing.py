@@ -10,7 +10,7 @@ from usainboltz.grammar import (
 	Marker,
 	Seq,
 	IteratedRule,
-	Set,
+	Set as LSet,
 	Cycle
 )
 from typing import List, Set, Union as TypeUnion
@@ -127,18 +127,18 @@ def point_sequence_rule(seq: Seq, point_to_empty: Set[RuleName]) -> Seq:
 		raise Exception("A sequence of a class containing empty elements can't exist.")
 	return seq*pointed_arg*seq
 
-def point_set_rule(set: Set):
+def point_set_rule(set: LSet, point_to_empty: Set[RuleName]):
 	"""
 	For a set (labelled), the pointing operation gives Pointed(Set(A)) = Pointed(A)*Set(A).
 	Because each atom is labelled differently, an element appearing in Pointed(A) can't appear
 	in Set(A), so at the end, Pointed(A)*Set(A) can still be considered to represent a set.
 	"""
-	pointed_arg = point_rule(seq.arg, point_to_empty)
+	pointed_arg = point_rule(set.arg, point_to_empty)
 	if pointed_arg == None:
 		raise Exception("A set of a class containing empty elements can't exist.")
 	return pointed_arg * set
 
-def point_cycle_rule(cycle: Cycle):
+def point_cycle_rule(cycle: Cycle, point_to_empty: Set[RuleName]):
 	"""
 	For a cycle (labelled), the pointing operation gives Pointed(Cycle(A)) = Pointed(A)*Seq(A).
 	Having an element pointed "anchor" the cycle at a given point, the cycle can then be considered
@@ -173,7 +173,7 @@ def point_rule(r: Rule, point_to_empty: Set[RuleName]) -> PointedRule:
 			return point_marker_rule(r, point_to_empty)
 		case Seq():
 			return point_sequence_rule(r, point_to_empty)
-		case Set():
+		case LSet():
 			return point_set_rule(r, point_to_empty)
 		case Cycle():
 			return point_cycle_rule(r, point_to_empty)

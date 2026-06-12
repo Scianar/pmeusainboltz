@@ -14,7 +14,7 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 (Fait)
 
 - Rajout des sets et cycles étiquetés.
-(Fait, non proprement testé)
+(Fait, non proprement testé, il y aura besoin d'aide pour les tests)
 
 - Imaginer et implémenter des tests.
 (En cours, il y aura besoin d'aide pour certains tests.)

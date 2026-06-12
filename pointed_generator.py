@@ -16,7 +16,7 @@ from usainboltz.grammar import (
 	Epsilon,
 	Grammar,
 	Seq,
-	Set,
+	Set as LSet,
 	Cycle
 )
 from usainboltz.generator import Generator
@@ -140,8 +140,8 @@ def tc_cycle_builder(cycle: Cycle, point_to_empty: Set[RuleName]):
 	"""
 	sub_builder = tc_rule_builder(cycle.arg, point_to_empty)
 	def builder(tp: tuple):
-		pointed_arg, seq = tp
-		return [sub_builder(pointed_arg)] + seq
+		pointed_arg, cycle = tp
+		return [sub_builder(pointed_arg)] + cycle
 	return builder
 
 def tc_rule_builder(r: Rule, point_to_empty: Set[RuleName]):
@@ -166,7 +166,7 @@ def tc_rule_builder(r: Rule, point_to_empty: Set[RuleName]):
 			return tc_rulename_builder(r, point_to_empty)
 		case Seq():
 			return tc_sequence_rule_builder(r, point_to_empty)
-		case Set():
+		case LSet():
 			return tc_set_builder(r, point_to_empty)
 		case Cycle():
 			return tc_cycle_rule_builder(r, point_to_empty)
@@ -213,6 +213,9 @@ class PointedGenerator(Generator):
 
 		super().__init__(self.grammar, rule_name, singular, expectations, oracle)
 
+		for rule in self.non_pointed_rulenames: #To associate all pointed rulenames to a builder.
+			self.set_builder(rule, identity_builder)
+
 	def _point(self, k:int = 1) -> Grammar:
 		"""
 		Point the generator k times (by default k=1). Can only be called before initialisation of the super class.
@@ -240,8 +243,21 @@ class PointedGenerator(Generator):
 		"""
 		super().set_builder(non_terminal, builder)
 
+		unpointed_builder = builder
 		for _ in range(self.nb_pointed):
 			non_terminal = pointed_rulename(non_terminal)
-			def composed_builder(tp: tuple):
-				return builder(self.default_pointed_builders[non_terminal](tp))
+			composed_builder = self._create_pointed_builder(non_terminal, unpointed_builder)	
 			super().set_builder(non_terminal, composed_builder)
+			unpointed_builder = composed_builder
+			#The default_pointed_builders unpoint the argument tuple once.
+			#When a generator has been pointed several times, it needs to
+			#compose its builders.
+
+	def _create_pointed_builder(self, non_terminal: RuleName, builder):
+		"""
+		Return a new builder over non_terminal.
+		non_terminal is a rule name pointed and builder is the builder of the unpointed rulename.
+		"""
+		def composed_builder(tp: tuple):
+			return builder(self.default_pointed_builders[non_terminal](tp))
+		return composed_builder
