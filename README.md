@@ -1,5 +1,6 @@
 # pmeusainboltz
 Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
+),
 
 # feuille de route 
 À peu près dans l'ordre de priorité:
@@ -14,14 +15,15 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 (Fait)
 
 - Rajout des sets et cycles étiquetés.
-(Fait, non proprement testé, il y aura besoin d'aide pour les tests)
+(Fait, il y aura besoin d'aide pour les tests de cycme)
 
 - Imaginer et implémenter des tests.
-(En cours, il y aura besoin d'aide pour certains tests.)
+(Pas l'intention d'en rajouter pour l'instant.)
 
 - Construire la théorie derrière la conversion des tuples.
 (Entamé)
 
 - Ajout de la gestion des arguments pour certaines constructions de classes.
+(Cela semble impossible avec l'outil Paganini actuel.)
 
 - (Mise en place de MSET et cycle non étiquetée)

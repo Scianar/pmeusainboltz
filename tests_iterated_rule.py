@@ -67,3 +67,13 @@ set_gen = PointedGenerator(set, B, oracle = oracle, k=2)
 set_gen.set_builder(B, build_all)
 res = set_gen.sample((1,100))
 print_test_result(set, set_gen.grammar, res.obj)
+
+
+"""
+#Test on mobile directly stolen from usainboltz.
+node = Atom()
+Mobile = RuleName("Mobile")
+grammar = Grammar({Mobile: node * (Epsilon() + Cycle(Mobile))})
+gen = PointedGenerator(grammar, Mobile)
+res = generator.sample((10,20))
+print_test_result(grammar, gen.grammar, res.obj)"""

@@ -27,6 +27,14 @@ PointedSuffix = "1b38a28af420e18b5b1687cd816ca5dd"
 #For now, the suffix is _P for readability reasons
 PointedSuffix = "_P"
 
+def _minus_one(i: TypeUnion[None, int]) -> TypeUnion[None, int]:
+	"""
+	If i is not None or zero diminish its value by one, otherwise return None.
+	"""
+	if i == None or i>0:
+		return i
+	return i-1
+
 def pointed_rule_name(name: str, k:int = 1) -> str:
 	"""
 	Given a rule name, return its pointed name.
@@ -147,7 +155,17 @@ def point_cycle_rule(cycle: Cycle, point_to_empty: Set[RuleName]):
 	pointed_arg = point_rule(cycle.arg, point_to_empty)
 	if pointed_arg == None:
 		raise Exception("A cycle of a class containing empty elements can't exist.")
-	return Product(pointed_arg,cycle)
+	return pointed_arg*Seq(cycle.arg)
+	"""
+	For now, arguments are not supported for different contraints.
+	return Product(pointed_arg, 
+		#One element of the cycle is contained in the pointed argument,
+		#therefore lower and greater size must be diminished.
+		Seq(cycle.arg,
+			geq = _minus_one(cycle.lower_size),
+			leq = _minus_one(cycle.upper_size))
+		)
+	"""
 
 def point_rule(r: Rule, point_to_empty: Set[RuleName]) -> PointedRule:
 	"""

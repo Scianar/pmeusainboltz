@@ -60,7 +60,6 @@ def tc_union_rule_builder(u: Union, point_to_empty: Set[RuleName]):
 			return (pointed_index[0], sub_builder(tp))
 	else:
 		def builder(tp: tuple):
-			print("REACHED")
 			(chosen_index, chosen_tp) = tp
 			sub_builder = sub_builders[chosen_index]
 			return (pointed_index[chosen_index], sub_builder(chosen_tp))
@@ -124,7 +123,7 @@ def tc_sequence_rule_builder(seq: Seq, point_to_empty: Set[RuleName]):
 		return left_seq + [sub_builder(pointed_arg)] + right_seq
 	return builder
 
-def tc_set_builder(set: Set, point_to_empty: Set[RuleName]):
+def tc_set_rule_builder(set: Set, point_to_empty: Set[RuleName]):
 	"""
 	A pointed set is a product Pointed(A)*Set(A).
 	"""
@@ -134,7 +133,7 @@ def tc_set_builder(set: Set, point_to_empty: Set[RuleName]):
 		return [sub_builder(pointed_arg)] + set
 	return builder
 
-def tc_cycle_builder(cycle: Cycle, point_to_empty: Set[RuleName]):
+def tc_cycle_rule_builder(cycle: Cycle, point_to_empty: Set[RuleName]):
 	"""
 	A pointed cycle is a product Pointed(A)*Seq(A).
 	"""
@@ -167,7 +166,7 @@ def tc_rule_builder(r: Rule, point_to_empty: Set[RuleName]):
 		case Seq():
 			return tc_sequence_rule_builder(r, point_to_empty)
 		case LSet():
-			return tc_set_builder(r, point_to_empty)
+			return tc_set_rule_builder(r, point_to_empty)
 		case Cycle():
 			return tc_cycle_rule_builder(r, point_to_empty)
 		case _:
@@ -210,7 +209,6 @@ class PointedGenerator(Generator):
 
 		self._point(k)
 		rule_name = pointed_rulename(rule_name, k)
-		print(self.grammar)
 		super().__init__(self.grammar, rule_name, singular, expectations, oracle)
 
 		for rule in self.non_pointed_rulenames: #To associate all pointed rulenames to a builder.
