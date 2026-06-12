@@ -125,7 +125,7 @@ def point_sequence_rule(seq: Seq, point_to_empty: Set[RuleName]) -> Seq:
 	pointed_arg = point_rule(seq.arg, point_to_empty)
 	if pointed_arg == None:
 		raise Exception("A sequence of a class containing empty elements can't exist.")
-	return seq*pointed_arg*seq
+	return Product(seq,pointed_arg,seq)
 
 def point_set_rule(set: LSet, point_to_empty: Set[RuleName]):
 	"""
@@ -136,7 +136,7 @@ def point_set_rule(set: LSet, point_to_empty: Set[RuleName]):
 	pointed_arg = point_rule(set.arg, point_to_empty)
 	if pointed_arg == None:
 		raise Exception("A set of a class containing empty elements can't exist.")
-	return pointed_arg * set
+	return Product(pointed_arg,set)
 
 def point_cycle_rule(cycle: Cycle, point_to_empty: Set[RuleName]):
 	"""
@@ -147,7 +147,7 @@ def point_cycle_rule(cycle: Cycle, point_to_empty: Set[RuleName]):
 	pointed_arg = point_rule(cycle.arg, point_to_empty)
 	if pointed_arg == None:
 		raise Exception("A cycle of a class containing empty elements can't exist.")
-	return pointed_arg * cycle
+	return Product(pointed_arg,cycle)
 
 def point_rule(r: Rule, point_to_empty: Set[RuleName]) -> PointedRule:
 	"""

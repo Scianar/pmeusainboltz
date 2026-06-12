@@ -210,7 +210,7 @@ class PointedGenerator(Generator):
 
 		self._point(k)
 		rule_name = pointed_rulename(rule_name, k)
-
+		print(self.grammar)
 		super().__init__(self.grammar, rule_name, singular, expectations, oracle)
 
 		for rule in self.non_pointed_rulenames: #To associate all pointed rulenames to a builder.
