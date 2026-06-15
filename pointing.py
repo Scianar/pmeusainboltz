@@ -139,7 +139,7 @@ def _seq_from_size_args(arg: Rule, lower_size: TypeUnion[int, None], upper_size:
 		return arg
 	if upper_size == 0:
 		return Epsilon()
-	return Seq(arg, geq = lower_size, leq = lower_size)
+	return Seq(arg, geq = lower_size, leq = upper_size)
 
 def _product_from_args(*args: Rule) -> Rule:
 	"""
@@ -157,7 +157,7 @@ def _product_from_args(*args: Rule) -> Rule:
 		return Epsilon()
 	if len(product_args) == 1:
 		return product_args[0]
-	return product_args
+	return Product(*product_args)
 
 def point_sequence_rule(seq: Seq, point_to_empty: Set[RuleName]) -> Seq:
 	"""
@@ -188,13 +188,13 @@ def point_sequence_rule(seq: Seq, point_to_empty: Set[RuleName]) -> Seq:
 	else:
 		nb_iterations = lo_size
 
-	for i in range(nb_iterations):#i is the number of A on the left.
+	for i in range(nb_iterations+1):#i is the number of A on the left.
 		left = _seq_from_size_args(seq.arg, i, i)
-		right = _seq_from_size_args(seq.arg, _minus_one(lo, i), _minus_one(up, i))
+		right = _seq_from_size_args(seq.arg, _minus_one(lo_size, i), _minus_one(up_size, i))
 		union_args.append(_product_from_args(left, pointed_arg, right))
 
 	if up_size == None: #In this case, there can be any number of A on the left.
-		union_args.append(Product(Seq(seq.arg, geq = lo), pointed_arg, Seq(seq.arg)))
+		union_args[-1] = Product(Seq(seq.arg, geq = lo_size), pointed_arg, Seq(seq.arg))
 	return union_from_args(union_args)
 
 def point_set_rule(set: LSet, point_to_empty: Set[RuleName]):
@@ -207,9 +207,9 @@ def point_set_rule(set: LSet, point_to_empty: Set[RuleName]):
 	if pointed_arg == None:
 		raise Exception("A set of a class containing empty elements can't exist.")
 	return Product(pointed_arg,
-		LSet(set.arg),
+		LSet(set.arg,
 		geq = _minus_one(set.lower_size),
-		leq = _minus_one(set.upper_size))
+		leq = _minus_one(set.upper_size)))
 
 def point_cycle_rule(cycle: Cycle, point_to_empty: Set[RuleName]):
 	"""
@@ -258,7 +258,6 @@ def point_rule(r: Rule, point_to_empty: Set[RuleName]) -> PointedRule:
 			return point_cycle_rule(r, point_to_empty)
 		case _:
 			#Todo: finish each case.
-			print(r)
 			raise Exception("Not yet implemented")
 
 #----------------------------------------------------------------

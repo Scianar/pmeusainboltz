@@ -4,19 +4,39 @@ Set of tests on iterated rules which have arguments.
 
 from pointing import *
 from usainboltz.grammar import *
-from usainboltz.generator import *
 from pointed_generator import *
 
-z = Atom()
-A = RuleName("A")
-cycle_grammar_1 = Grammar({A: Cycle(z*z+z, leq = 2, geq = 1)})
-cycle_gen = PointedGenerator(cycle_grammar_1, A, k=1)
-res = cycle_gen.sample((1,100))
-assert(0 <= len(res.obj) <= 1)
-pritn("Success for the first test.")
+#----------Grammar-------------
 
-cycle_grammar_2 = Grammar({A: Cycle(z*z+z, eq = 5)})
-cycle_gen = PointedGenerator(cycle_grammar_1, A, k=1)
-res = cycle_gen.sample((1,100))
-assert(len(res.obj) == 5)
-pritn("Success for the second test.")
+def print_test(g, g_pointed):
+	print("\n\nGrammar of G:")
+	print(g)
+	print("Pointed grammar of pointed grammar of G:")
+	print(g_pointed)
+	print("\n\n\n")
+
+z = Atom()
+A, B = RuleName("A"), RuleName("B")
+cycle_grammar_1 = Grammar({A: Seq(B, leq = 2, geq = 1), B:z})
+cycle_grammar_1_P = cycle_grammar_1
+for i in range(2):
+	cycle_grammar_1_P = point_grammar(cycle_grammar_1_P)[0]
+print_test(cycle_grammar_1, cycle_grammar_1_P)
+
+cycle_grammar_2 = Grammar({A: Cycle(B, leq = 2, geq = 1), B:z})
+cycle_grammar_2_P = cycle_grammar_2
+for i in range(2):
+	cycle_grammar_2_P = point_grammar(cycle_grammar_2_P)[0]
+print_test(cycle_grammar_2, cycle_grammar_2_P)
+
+cycle_grammar_3 = Grammar({A: LSet(B, leq = 2, geq = 1), B:z})
+cycle_grammar_3_P = cycle_grammar_3
+for i in range(2):
+	cycle_grammar_3_P = point_grammar(cycle_grammar_3_P)[0]
+print_test(cycle_grammar_3, cycle_grammar_3_P)
+
+cycle_grammar_4 = Grammar({A: Seq(B, geq = 2), B:z})
+cycle_grammar_4_P = cycle_grammar_4
+for i in range(2):
+	cycle_grammar_4_P = point_grammar(cycle_grammar_4_P)[0]
+print_test(cycle_grammar_4, cycle_grammar_4_P)
