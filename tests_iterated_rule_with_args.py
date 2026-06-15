@@ -1,7 +1,7 @@
 """
 Set of tests on iterated rules which have arguments.
 """
-"""
+
 from pointing import *
 from usainboltz.grammar import *
 from usainboltz.generator import *
@@ -19,4 +19,4 @@ cycle_grammar_2 = Grammar({A: Cycle(z*z+z, eq = 5)})
 cycle_gen = PointedGenerator(cycle_grammar_1, A, k=1)
 res = cycle_gen.sample((1,100))
 assert(len(res.obj) == 5)
-pritn("Success for the second test.")"""
+pritn("Success for the second test.")

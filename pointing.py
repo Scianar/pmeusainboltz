@@ -13,7 +13,7 @@ from usainboltz.grammar import (
 	Set as LSet,
 	Cycle
 )
-from typing import List, Set, Union as TypeUnion
+from typing import List, Set, Union as TypeUnion, Optional
 
 #When pointing, it is possible to have empty rules (like for the epsilon class).
 #That's why, we need a new rule, represented by None, temporarily.
@@ -27,13 +27,15 @@ PointedSuffix = "1b38a28af420e18b5b1687cd816ca5dd"
 #For now, the suffix is _P for readability reasons
 PointedSuffix = "_P"
 
-def _minus_one(i: TypeUnion[None, int]) -> TypeUnion[None, int]:
+def _minus_one(i: TypeUnion[None, int], k: Optional[int] = 1) -> TypeUnion[None, int]:
 	"""
 	If i is not None or zero diminish its value by one, otherwise return None.
+
+	If k is provided, repeat the operations k times.
 	"""
-	if i == None or i>0:
+	if i == None:
 		return i
-	return i-1
+	return max(i-k,0)
 
 def pointed_rule_name(name: str, k:int = 1) -> str:
 	"""
@@ -125,15 +127,75 @@ def point_marker_rule(m: Marker, _: Set[RuleName]) -> None:
 	"""
 	return None
 
+def _seq_from_size_args(arg: Rule, lower_size: TypeUnion[int, None], upper_size: TypeUnion[int, None]) -> Rule:
+	"""
+	Similar to union from args, takes as input the rule inside the sequence, the lower and upper
+	size of the sequence (number of times the rule appears).
+
+	If the sequence contains exatcly zero elements, return Epsilon(), if it contains exactly one
+	element, return the rule, all other cases, return the sequence.
+	"""
+	if lower_size == 1 == upper_size:
+		return arg
+	if upper_size == 0:
+		return Epsilon()
+	return Seq(arg, geq = lower_size, leq = lower_size)
+
+def _product_from_args(*args: Rule) -> Rule:
+	"""
+	Return a product of args performing the following reductions:
+	If a rule in the product is an epsilon, remove it.
+	If there are no arguments remaining, return Epsilon().
+	If there is one argument remaining, return the arguement.
+	Otherwise return a product.
+	"""
+	product_args = []
+	for arg in args:
+		if not arg is Epsilon():
+			product_args.append(arg)
+	if len(product_args) == 0:
+		return Epsilon()
+	if len(product_args) == 1:
+		return product_args[0]
+	return product_args
+
 def point_sequence_rule(seq: Seq, point_to_empty: Set[RuleName]) -> Seq:
 	"""
 	The definition used for pointing here is:
 	Pointed(Seq(A)) = Seq(A)*Pointed(A)*Seq(A).
+
+	When seq has sizes conditions, realise union over the repartition on the left and the right
+	of the number of elements.
+	If an element (on the left or right), would be a sequence of zero elements, it disappears
+	from the product. One element, it becomes its argument. Otherwise nothing is changed.
+	For the union, reduction follows the same rules as for product and union.
 	"""
 	pointed_arg = point_rule(seq.arg, point_to_empty)
 	if pointed_arg == None:
 		raise Exception("A sequence of a class containing empty elements can't exist.")
-	return Product(seq,pointed_arg,seq)
+	
+	up_size = _minus_one(seq.upper_size)
+	lo_size = _minus_one(seq.lower_size)
+	if lo_size == None: #Having no lower size is equivalent to having a lower size of 0.
+		lo_size = 0
+	
+	#seq.arg will be designated as A for the following comentaries.
+
+	#The disjunction is always made on the number of A on the left of the pointed A.
+	union_args = []
+	if up_size != None:
+		nb_iterations = up_size
+	else:
+		nb_iterations = lo_size
+
+	for i in range(nb_iterations):#i is the number of A on the left.
+		left = _seq_from_size_args(seq.arg, i, i)
+		right = _seq_from_size_args(seq.arg, _minus_one(lo, i), _minus_one(up, i))
+		union_args.append(_product_from_args(left, pointed_arg, right))
+
+	if up_size == None: #In this case, there can be any number of A on the left.
+		union_args.append(Product(Seq(seq.arg, geq = lo), pointed_arg, Seq(seq.arg)))
+	return union_from_args(union_args)
 
 def point_set_rule(set: LSet, point_to_empty: Set[RuleName]):
 	"""
@@ -144,7 +206,10 @@ def point_set_rule(set: LSet, point_to_empty: Set[RuleName]):
 	pointed_arg = point_rule(set.arg, point_to_empty)
 	if pointed_arg == None:
 		raise Exception("A set of a class containing empty elements can't exist.")
-	return Product(pointed_arg,set)
+	return Product(pointed_arg,
+		LSet(set.arg),
+		geq = _minus_one(set.lower_size),
+		leq = _minus_one(set.upper_size))
 
 def point_cycle_rule(cycle: Cycle, point_to_empty: Set[RuleName]):
 	"""
@@ -155,9 +220,6 @@ def point_cycle_rule(cycle: Cycle, point_to_empty: Set[RuleName]):
 	pointed_arg = point_rule(cycle.arg, point_to_empty)
 	if pointed_arg == None:
 		raise Exception("A cycle of a class containing empty elements can't exist.")
-	return pointed_arg*Seq(cycle.arg)
-	"""
-	For now, arguments are not supported for different contraints.
 	return Product(pointed_arg, 
 		#One element of the cycle is contained in the pointed argument,
 		#therefore lower and greater size must be diminished.
@@ -165,8 +227,7 @@ def point_cycle_rule(cycle: Cycle, point_to_empty: Set[RuleName]):
 			geq = _minus_one(cycle.lower_size),
 			leq = _minus_one(cycle.upper_size))
 		)
-	"""
-
+	
 def point_rule(r: Rule, point_to_empty: Set[RuleName]) -> PointedRule:
 	"""
 	Return the pointed rule.
