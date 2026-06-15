@@ -200,67 +200,7 @@ def point_rule(r: Rule, point_to_empty: Set[RuleName]) -> PointedRule:
 			print(r)
 			raise Exception("Not yet implemented")
 
-#----------------------------------------------------------------
-"""
-This code section is dedicated to establish the order in which rulenames should be pointed.
-"""
-def rulenames_appearing(r: Rule) -> Set[RuleName]:
-	"""
-	Return the set of rulenames which appear in the rule r.
-	"""
-	match r:
-		case IteratedRule():
-			return rulenames_appearing(r.arg)
-		case Epsilon() | Atom() | Marker():
-			return set()
-		case RuleName():
-			return set([r])
-		case Union() | Product():
-			s = set()
-			for arg in r.args:
-				s = s.union(rulenames_appearing(arg))
-			return s
-		case _:
-			raise Exception("This case is not handled")
 
-def order_from_rulename(start: RuleName, g: Grammar, explored: Set[RuleName], order: List[RuleName]):
-	"""
-	Auxiliary function for order_to_point.
-
-	Explore the graph of dependancy of the grammar starting from the given rulename. Add
-	at the end of order rulenames in the inverse order in which they should be explored.
-
-	explored: set of rulenames which have been explored before.
-
-	Both order and explored will be modified to obtain the correct result.
-	"""
-	if start in explored:
-		return
-
-	explored.add(start)
-	for rule in rulenames_appearing(g.rules[start]).difference(explored):
-		order_from_rulename(rule, g, explored, order)
-
-	order.append(start)
-
-def order_to_point(g: Grammar) -> List[RuleName]:
-	"""
-	Establish the order in which rulenames should be pointed.
-
-	A rulename which is pointed to the empty class should always be pointed after the rulenames present in its
-	specifcation. There are no cycle, indeed such a cycle would give an infinite number of empty elements.
-	"""
-	order = []
-	explored = set()
-	for rulename in g.rules.keys():
-		order_from_rulename(rulename, g, explored, order)
-	
-	return order
-
-#---------------------------------------------------------------
-
-#Todo: rework the function to return a dictionnary whith values as rulenames which have been created
-#by pointing and which did not appear before in g and keys as the rulenames which point to their key.
 def point_grammar(g: Grammar) -> (Grammar, Set[RuleName], Set[RuleName]):
 	"""
 	Return the pointed grammar.
