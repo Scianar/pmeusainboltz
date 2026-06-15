@@ -27,7 +27,7 @@ PointedSuffix = "1b38a28af420e18b5b1687cd816ca5dd"
 #For now, the suffix is _P for readability reasons
 PointedSuffix = "_P"
 
-def _minus_one(i: TypeUnion[None, int], k: Optional[int] = 1) -> TypeUnion[None, int]:
+def minus_one(i: TypeUnion[None, int], k: Optional[int] = 1) -> TypeUnion[None, int]:
 	"""
 	If i is not None or zero diminish its value by one, otherwise return None.
 
@@ -174,8 +174,8 @@ def point_sequence_rule(seq: Seq, point_to_empty: Set[RuleName]) -> Seq:
 	if pointed_arg == None:
 		raise Exception("A sequence of a class containing empty elements can't exist.")
 	
-	up_size = _minus_one(seq.upper_size)
-	lo_size = _minus_one(seq.lower_size)
+	up_size = minus_one(seq.upper_size)
+	lo_size = minus_one(seq.lower_size)
 	if lo_size == None: #Having no lower size is equivalent to having a lower size of 0.
 		lo_size = 0
 	
@@ -184,17 +184,17 @@ def point_sequence_rule(seq: Seq, point_to_empty: Set[RuleName]) -> Seq:
 	#The disjunction is always made on the number of A on the left of the pointed A.
 	union_args = []
 	if up_size != None:
-		nb_iterations = up_size
+		nb_iterations = up_size + 1
 	else:
 		nb_iterations = lo_size
 
-	for i in range(nb_iterations+1):#i is the number of A on the left.
+	for i in range(nb_iterations):#i is the number of A on the left.
 		left = _seq_from_size_args(seq.arg, i, i)
-		right = _seq_from_size_args(seq.arg, _minus_one(lo_size, i), _minus_one(up_size, i))
+		right = _seq_from_size_args(seq.arg, minus_one(lo_size, i), minus_one(up_size, i))
 		union_args.append(_product_from_args(left, pointed_arg, right))
 
 	if up_size == None: #In this case, there can be any number of A on the left.
-		union_args[-1] = Product(Seq(seq.arg, geq = lo_size), pointed_arg, Seq(seq.arg))
+		union_args.append(Product(Seq(seq.arg, geq = lo_size), pointed_arg, Seq(seq.arg)))
 	return union_from_args(union_args)
 
 def point_set_rule(set: LSet, point_to_empty: Set[RuleName]):
@@ -208,8 +208,8 @@ def point_set_rule(set: LSet, point_to_empty: Set[RuleName]):
 		raise Exception("A set of a class containing empty elements can't exist.")
 	return Product(pointed_arg,
 		LSet(set.arg,
-		geq = _minus_one(set.lower_size),
-		leq = _minus_one(set.upper_size)))
+		geq = minus_one(set.lower_size),
+		leq = minus_one(set.upper_size)))
 
 def point_cycle_rule(cycle: Cycle, point_to_empty: Set[RuleName]):
 	"""
@@ -224,8 +224,8 @@ def point_cycle_rule(cycle: Cycle, point_to_empty: Set[RuleName]):
 		#One element of the cycle is contained in the pointed argument,
 		#therefore lower and greater size must be diminished.
 		Seq(cycle.arg,
-			geq = _minus_one(cycle.lower_size),
-			leq = _minus_one(cycle.upper_size))
+			geq = minus_one(cycle.lower_size),
+			leq = minus_one(cycle.upper_size))
 		)
 	
 def point_rule(r: Rule, point_to_empty: Set[RuleName]) -> PointedRule:

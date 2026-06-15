@@ -24,7 +24,7 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 (Entamé)
 
 - Ajout de la gestion des arguments pour certaines constructions de classes.
-(Fait pour la grammaire pas pour les builders.)
+(Fait, non testé pour les builders)
 
 - Intégration de la méthode de pointage dans la bibliothèque UsainBoltz.
 (Git sur gitlab)

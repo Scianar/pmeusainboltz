@@ -112,20 +112,105 @@ def tc_rulename_builder(r: RuleName, point_to_empty: Set[RuleName]):
 	"""
 	return identity_builder
 
+def _builder_for_sequence(arg: Rule, pointed_arg: Rule, i:int, lo_size: TypeUnion[int, None], up_size: TypeUnion[int, None], sub_builder):
+	"""
+	An auxiliary function for tc_sequence_rule_builder.
+	A stands for arg.
+	A_P stands for pointed_arg.
+	Return a builder for Product(A^i,A_P,Seq(A, lo_size, up_size)) with possible reductions.
+
+	i: the number of A on the left of A_P.
+	lo_size: the minimum number of elements in the pointed sequence (without counting A_P)
+	up_size: idem but for the maximum number.
+	sub_builder: the builder to call on pointed_arg.
+	"""
+	r_lo_size = minus_one(lo_size, i)
+	r_up_size = minus_one(up_size, i)
+
+	if i>0:#There is a need for a left builder.
+		if i>1:
+			left_builder = identity_builder
+		else:
+			def left_builder(tp: tuple): #The left has the format A when we want [A].
+				return [tp]
+
+	if r_up_size == None or r_up_size > 0: #There is a need for a right builder.
+		if r_lo_size == 1 == r_up_size:
+			def right_builder(tp: tuple):
+				return [tp]
+		else:
+			left_builder = identity
+
+
+	if 0 == r_up_size and i == 0: #Case A_P
+		return sub_builder
+	if 0 == r_up_size: #Case A^i * A_P
+		def builder(tp: tuple):
+			(left, pointed) = tp
+			return left_builder(left) + [sub_builder(pointed)]
+		return builder
+	if i==0: #Case A_P * Seq(...)
+		def builder(tp: tuple):
+			(pointed, right) = tp
+			return [sub_builder(pointed)] + right_builder(right)
+		return builder
+	#Case A^i * A_P * Seq(...)
+	def builder(tp: tuple):
+		(left, pointed, right) = tp
+		return left_builder(left) + [sub_builder(pointed)] + right_builder(right)
+	return builder
+
 def tc_sequence_rule_builder(seq: Seq, point_to_empty: Set[RuleName]):
 	"""
-	A pointed sequence is a product: Seq(A)*pointed(A)*Seq(A).
-	To unpoint the sequence, we just need to "flatten" the tuple.
+	You can refer to the documentation on pointing a sequence to undertand how a sequence is pointed.
 	"""
 	sub_builder = tc_rule_builder(seq.arg, point_to_empty)
-	def builder(tp: tuple):
-		left_seq, pointed_arg, right_seq = tp
-		return left_seq + [sub_builder(pointed_arg)] + right_seq
+
+	up_size = minus_one(seq.upper_size)
+	lo_size = minus_one(seq.lower_size)
+	if lo_size == None:
+		lo_size = 0
+	
+	builders = []
+	if up_size != None:
+		nb_iterations = up_size + 1
+	else:
+		nb_iterations = lo_size
+
+	for i in range(nb_iterations):
+		builders.append(_builder_for_sequence(
+			seq.arg,
+			pointed_arg,
+			i,
+			lo_size,
+			up_size
+			))
+
+		left = _seq_from_size_args(seq.arg, i, i)
+		right = _seq_from_size_args(seq.arg, minus_one(lo_size, i), minus_one(up_size, i))
+		builders.append(_product_from_args(left, pointed_arg, right))
+
+	if up_size == None:
+		def builder(tp: tuple):
+			(left, pointed, right) = tp
+			return left + [sub_builder(pointed)] + right
+		builders.append(builder)
+
+
+	if len(builders) == 1: #There is no union, just directly a product or sequence.
+		return builders[0]
+	else:
+		def builder(tp: tuple):
+			(i, choice) = tp #We extract informations from the union first.
+			return builders[i](choice)
 	return builder
+
 
 def tc_set_rule_builder(set: Set, point_to_empty: Set[RuleName]):
 	"""
 	A pointed set is a product Pointed(A)*Set(A).
+
+	Nothing to change when arguments on size are given.
 	"""
 	sub_builder = tc_rule_builder(set.arg, point_to_empty)
 	def builder(tp: tuple):
@@ -136,6 +221,8 @@ def tc_set_rule_builder(set: Set, point_to_empty: Set[RuleName]):
 def tc_cycle_rule_builder(cycle: Cycle, point_to_empty: Set[RuleName]):
 	"""
 	A pointed cycle is a product Pointed(A)*Seq(A).
+
+	Nothing to change when arguments on size are given.
 	"""
 	sub_builder = tc_rule_builder(cycle.arg, point_to_empty)
 	def builder(tp: tuple):
