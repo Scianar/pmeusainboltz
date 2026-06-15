@@ -15,7 +15,7 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 (Fait)
 
 - Rajout des sets et cycles étiquetés.
-(Fait, il y aura besoin d'aide pour les tests de cycme)
+(Fait, il y aura besoin d'aide pour les tests de cycle)
 
 - Imaginer et implémenter des tests.
 (Pas l'intention d'en rajouter pour l'instant.)
@@ -25,5 +25,8 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 
 - Ajout de la gestion des arguments pour certaines constructions de classes.
 (Cela semble impossible avec l'outil Paganini actuel.)
+
+- Intégration de la méthode de pointage dans la bibliothèque UsainBoltz.
+(Git sur gitlab)
 
 - (Mise en place de MSET et cycle non étiquetée)
