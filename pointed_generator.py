@@ -112,17 +112,17 @@ def tc_rulename_builder(r: RuleName, point_to_empty: Set[RuleName]):
 	"""
 	return identity_builder
 
-def _builder_for_sequence(arg: Rule, pointed_arg: Rule, i:int, lo_size: TypeUnion[int, None], up_size: TypeUnion[int, None], sub_builder):
+def _builder_for_sequence(arg: Rule, i:int, lo_size: TypeUnion[int, None], up_size: TypeUnion[int, None], sub_builder):
 	"""
 	An auxiliary function for tc_sequence_rule_builder.
 	A stands for arg.
-	A_P stands for pointed_arg.
+	A_P stands for A pointed.
 	Return a builder for Product(A^i,A_P,Seq(A, lo_size, up_size)) with possible reductions.
 
 	i: the number of A on the left of A_P.
 	lo_size: the minimum number of elements in the pointed sequence (without counting A_P)
 	up_size: idem but for the maximum number.
-	sub_builder: the builder to call on pointed_arg.
+	sub_builder: the builder to call on A pointed.
 	"""
 	r_lo_size = minus_one(lo_size, i)
 	r_up_size = minus_one(up_size, i)
@@ -139,7 +139,7 @@ def _builder_for_sequence(arg: Rule, pointed_arg: Rule, i:int, lo_size: TypeUnio
 			def right_builder(tp: tuple):
 				return [tp]
 		else:
-			left_builder = identity
+			right_builder = identity_builder
 
 
 	if 0 == r_up_size and i == 0: #Case A_P
@@ -180,15 +180,11 @@ def tc_sequence_rule_builder(seq: Seq, point_to_empty: Set[RuleName]):
 	for i in range(nb_iterations):
 		builders.append(_builder_for_sequence(
 			seq.arg,
-			pointed_arg,
 			i,
 			lo_size,
-			up_size
+			up_size,
+			sub_builder
 			))
-
-		left = _seq_from_size_args(seq.arg, i, i)
-		right = _seq_from_size_args(seq.arg, minus_one(lo_size, i), minus_one(up_size, i))
-		builders.append(_product_from_args(left, pointed_arg, right))
 
 	if up_size == None:
 		def builder(tp: tuple):
