@@ -12,6 +12,13 @@ For now, only contain tests on the grammar.
 Print the output, its up to the user to check the correcness of the answer.
 """
 
+def print_test(g, g_pointed):
+	print("\n\nGrammar of G:")
+	print(g)
+	print("Pointed grammar of G:")
+	print(g_pointed)
+	print("\n\n\n")
+
 
 a,b,e = Marker("a"), Marker("b"), Epsilon()
 z = Atom()

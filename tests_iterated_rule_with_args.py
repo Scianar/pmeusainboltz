@@ -17,7 +17,7 @@ def print_test(g, g_pointed):
 
 z = Atom()
 A, B = RuleName("A"), RuleName("B")
-"""
+
 grammar_1 = Grammar({A: Seq(B, leq = 2, geq = 1), B:z})
 grammar_1_P = grammar_1
 for i in range(2):
@@ -41,7 +41,6 @@ grammar_4_P = grammar_4
 for i in range(2):
 	grammar_4_P = point_grammar(grammar_4_P)[0]
 print_test(grammar_4, grammar_4_P)
-"""
 
 #----------------Builders---------------------
 

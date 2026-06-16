@@ -146,12 +146,12 @@ def _product_from_args(*args: Rule) -> Rule:
 	Return a product of args performing the following reductions:
 	If a rule in the product is an epsilon, remove it.
 	If there are no arguments remaining, return Epsilon().
-	If there is one argument remaining, return the arguement.
+	If there is one argument remaining, return the argument.
 	Otherwise return a product.
 	"""
 	product_args = []
 	for arg in args:
-		if not arg is Epsilon():
+		if not isinstance(arg,Epsilon):
 			product_args.append(arg)
 	if len(product_args) == 0:
 		return Epsilon()

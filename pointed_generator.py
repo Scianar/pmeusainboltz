@@ -67,7 +67,7 @@ def tc_union_rule_builder(u: Union, point_to_empty: Set[RuleName]):
 
 def tc_product_rule_builder(p: Product, point_to_empty: Set[RuleName]):
 	"""
-	The problemen encountered is identical to the one in tc_union_rule.
+	The probleme encountered is identical to the one in tc_union_rule.
 	Some elements might disappear in the resulting pointed union.
 	"""
 	pointed_index = compute_pointed_index(p.args, point_to_empty)
@@ -202,7 +202,7 @@ def tc_sequence_rule_builder(seq: Seq, point_to_empty: Set[RuleName]):
 	return builder
 
 
-def tc_set_rule_builder(set: Set, point_to_empty: Set[RuleName]):
+def tc_set_rule_builder(set: LSet, point_to_empty: Set[RuleName]):
 	"""
 	A pointed set is a product Pointed(A)*Set(A).
 
