@@ -72,4 +72,14 @@ input_4 = (z) #zP
 output_4 = builder_3(input_4)
 print_test_builders(z, output_4)
 
-#Todo: add one test for set and one for cycle.
+grammar_8 = Grammar({A: LSet(z, eq = 5)})
+builder_4 = pointed_builder(grammar_8.rules[A], {})
+input_5 = (z,[z,z,z,z])
+output_5 = builder_4(input_5)
+print_test_builders([z,z,z,z,z], output_5)
+
+grammar_9 = Grammar({A: LSet(z, eq = 4)})
+builder_5 = pointed_builder(grammar_9.rules[A], {})
+input_6 = (z,[z,z,z])
+output_6 = builder_4(input_6)
+print_test_builders([z,z,z,z], output_6)
