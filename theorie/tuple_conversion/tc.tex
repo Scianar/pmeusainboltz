@@ -1,32 +1,53 @@
 \documentclass{article}
 \usepackage{amsmath}
 \usepackage{semantic}
+\usepackage{listings}
 \newtheorem{theorem}{Theorem}
 \newtheorem{proof}{Proof}
 \newtheorem{lemme}{Lemme}
 \newtheorem{definition}{Definition}
 
-\begin{document}
-Éléments de théorie pour la construction des builders. Le but de ce petit article est de donner la base de la théorie pour prouver la correction de l'algorithme qui construit les builders pointés.
+\lstset{language=Python}
 
-Les builders font appel à des tuples imbriqués comme arguments, la première question est donc de savoir à quelles conditions un tuple peut-être considéré comme valide pour une règle. Il faudra ensuite montrer que des tuples pointés sont envoyés par l'algorithme vers des tuples non pointés. Enfin, il faut s'assurer que $n$ tuples pointés de taille $n$ (en tant qu'objet d'une classe combinatoire) sont envoyés vers un seul tuple non pointé de taille $n$. Cela devrait suffire.
+\begin{document}
+Éléments de théorie pour la création des constructeurs. Le but de ce petit article est de donner la base de la théorie pour prouver la correction de l'algorithme qui construit les constructeurs pointés.
+
+Les constructeurs font appel à des tuples imbriqués comme arguments, la première question est donc de savoir à quelles conditions un tuple peut-être considéré comme valide pour une règle. Il faudra ensuite montrer que des tuples pointés sont envoyés par l'algorithme vers des tuples non pointés. Enfin, il faut s'assurer que $n$ tuples pointés de taille $n$ (en tant qu'objet d'une classe combinatoire) sont envoyés vers un seul tuple non pointé de taille $n$. Cela devrait suffire.
 
 Quelques éléments de définition:
 \begin{itemize}
 	\item On appelle classes auxiliaires les règles correspondant aux RuleName dans la bibliothèque UsainBoltz.
-	\item La fonction qui correspond à l'opération de dépointage d'un tuple est noté: $Unpoint$, elle prend deux arguments, $Unpoin(t,A)$ avec $A$ la règle associée à la production de $t$. La grammaire est considérée comme sous entendu.
+	\item On appelle constructeurs ce qu'on appelle builders au sein de la bibliothèque UsainBotlz.
 	\item On note $|t|_z$ la taille d'un tuple $t$ en tant qu'objet d'une classe combinatoire.
 \end{itemize}
 
 Quelques éléments de simplification par rapport aux vraix algorithmes point et unpoint:
 \begin{itemize}
-	\item on considère qu'il existe une règle $Zero$ qui correspond à la classe vide, cette classe est utilisée en lieu et place des simplifications qui ont place dans le vrai algorithme Point.
-	\item on ne prend pas en compte le fait que le générateur génère la structure par étape en s'arrêtant aux classes auxiliaires et que unpoint fait de même. On suppose que les deux gèrent les tuples de la racine jusqu'aux feuilles.
+	\item on considère qu'il existe une règle $Zero$ qui correspond à la classe vide, cette classe est utilisée en lieu et place des simplifications qui ont place dans le vrai algorithme Point
+	\item on suppose que les constructeurs prennent toujours en argument des tuples et renvoients des tuples. Dans le cas de règles itérées qui renvoient en réalités des listes, on suppose que ces listes sont des tuples. Pour tout autre objet n'étant pas un tuple renvoyé (que ce soit par les constructeurs par défaut pour atoms, epsilons et markers, ou par les constructeurs fournis par l'utilisateur), on suppose que c'est un tuple contenant un seul élément.
 \end{itemize}
 
-La première étape est inspirée des arbres de preuves.
+On commence par définir l'algorithme de dépointage:
 
+\begin{lstlisting}
+def Unpoint(A: Rule, t: tuple) -> tuple:
+	swith type(A):
+		case Union(A1, ..., An):
+			(i, tu) = t
+			return (i, Unpoint(Ai, tu))
+		case Product(A1, ..., An):
+			(i, (t1, ..., tn)) = t
+			return (t1, ..., Unpoint(Ai, ti), ..., tn)
+		case Seq(A):
+			(t1, (t2, ..., tn)) = t
+			return (Unpoint(A, t1), t2, ..., tn)
+		case RuleName:
+			return t
+\end{lstlisting}
+
+Passons à la preuve,
 \begin{definition}[Tuple acceptable pour une règle.]
+Un contexte $\Gamma$ est la donnée d'une grammaire $G$ et d'un dictionnaire qui associe à chaque classe auxiliaire une fonction qui prend en argument un tuple acceptacle pour la classe auxiliaire et qui renvoie un nouvel objet.
 Pour $G$ une grammaire, $A$ une règle de cette grammaire, $t$ un tuple, on dit que $t$ est acceptable pour $A$ et on note $G:A \vdash t$ si cette proposition peut être déduite des règles d'inférences que nous allons lister.
 
 $$\inference{}{G:Epsilon()\vdash ('epsilon')}[Epsilon]$$
@@ -41,7 +62,7 @@ $$\inference{G:A_1\vdash t_1\quad ...\quad G:A_n \vdash t_n}{G:A_1 \times ... \t
 
 $$\inference{G:A \vdash t_1\quad ...\quad G:A \vdash t_n}{G:Seq(A) \vdash (t_1,...,t_n)}[Sequence]$$
 
-$$\inference{\text{$A$ est une classe auxiliaire associée à la règle $R$ dans $G$} \quad G:R\vdash t}{G:A\vdash t}[Simplifiction]$$
+$$\inference{\text{$A$ est une classe auxiliaire associée à la règle $R$ et la fonction $B$ dans $G$} \quad G:R\vdash t}{G:A\vdash B(t)}[Simplifiction]$$
 \end{definition}
 
 À l'aide entre autre de cette théorie, il faut alors montrer les trois théorèmes suivants:
