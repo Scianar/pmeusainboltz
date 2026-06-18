@@ -23,8 +23,8 @@ Quelques éléments de définition:
 
 Quelques éléments de simplification par rapport aux vraix algorithmes point et unpoint:
 \begin{itemize}
-	\item on considère qu'il existe une règle $Zero$ qui correspond à la classe vide, cette classe est utilisée en lieu et place des simplifications qui ont place dans le vrai algorithme Point
-	\item on suppose que les constructeurs prennent toujours en argument des tuples et renvoients des tuples. Dans le cas de règles itérées qui renvoient en réalités des listes, on suppose que ces listes sont des tuples. Pour tout autre objet n'étant pas un tuple renvoyé (que ce soit par les constructeurs par défaut pour atoms, epsilons et markers, ou par les constructeurs fournis par l'utilisateur), on suppose que c'est un tuple contenant un seul élément.
+	\item on considère qu'il existe une règle $Zero$ qui correspond à la classe vide, cette classe est utilisée en lieu et place des simplifications qui ont place dans le vrai algorithme de pointage.
+	\item on suppose que les constructeurs prennent toujours en argument des tuples et renvoients des tuples. Dans le cas de règles itérées qui renvoient en réalités de listes, on suppose que ces listes sont des tuples. Pour tout autre objet n'étant pas un tuple renvoyé (que ce soit par les constructeurs par défaut pour atoms, epsilons et markers, ou par les constructeurs fournis par l'utilisateur), on suppose que c'est un tuple contenant un seul élément.
 \end{itemize}
 
 On commence par définir l'algorithme de dépointage:
@@ -41,8 +41,9 @@ def Unpoint(A: Rule, t: tuple) -> tuple:
 		case Seq(A):
 			(t1, (t2, ..., tn)) = t
 			return (Unpoint(A, t1), t2, ..., tn)
-		case RuleName:
-			return t
+		case RuleName(_):
+			#A associé à la règle R et au constructeur B. 
+			return B((Unpoint(R,t))
 \end{lstlisting}
 
 Passons à la preuve,
@@ -116,7 +117,7 @@ $A = A_1 \times ... \times A_n$, alors $A^{\bullet} = A_1^{\bullet}\times A_2 \t
 
 	\item
 Si $A$ est une classe auxiliaire, la seule règle appliquable est la simplifcation, on a donc $A^{\bullet}: R \in G^{\bullet}$, or $A$ apparait dans $G$. Par définition du pointage, il existe $T$ tel que $T^{\bullet} = R$ et $A: T\in G$.
-Par hypothèse, $G^{\bullet}: A^{\bullet} \vdash t$ donc $G^{\bullet}: R \vdash T$. On conclut par hypothèse d'induction et application de la règle de simplification. Le sens réciproque est identique.
+Par hypothèse, $G^{\bullet}: A^{\bullet} \vdash t$, or le constructeur associé à $A$ est forcément l'identité car l'utilisateur n'a pas pu en fournir un autre, donc $G^{\bullet}: R \vdash t$. On conclut par hypothèse d'induction et application de la règle de simplification. Le sens réciproque est identique.
 \end{itemize}
 
 \end{proof}
