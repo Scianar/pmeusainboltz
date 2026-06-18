@@ -1,5 +1,6 @@
 \documentclass{article}
 \usepackage{amsmath}
+\usepackage{amsfonts}
 \usepackage{semantic}
 \newtheorem{theorem}{Theorem}
 \newtheorem{proof}{Proof}
@@ -9,40 +10,64 @@
 \begin{document}
 Éléments de théorie pour la construction des builders. Le but de ce petit article est de donner la base de la théorie pour prouver la correction de l'algorithme qui construit les builders pointés.
 
-Les builders font appel à des tuples imbriqués comme arguments, la première question est donc de savoir à quelles conditions un tuple peut-être considéré comme valide pour une règle. Il faudra ensuite montrer que des tuples pointés sont envoyés par l'algorithme vers des tuples non pointés. Enfin, il faut s'assurer que $n$ tuples pointés de taille $n$ (en tant qu'objet d'une classe combinatoire) sont envoyés vers un seul tuple non pointé de taille $n$. Cela devrait suffire.
-
 Quelques éléments de définition:
 \begin{itemize}
 	\item On appelle classes auxiliaires les règles correspondant aux RuleName dans la bibliothèque UsainBoltz.
-	\item La fonction qui correspond à l'opération de dépointage d'un tuple est noté: $Unpoint$, elle prend deux arguments, $Unpoin(t,A)$ avec $A$ la règle associée à la production de $t$. La grammaire est considérée comme sous entendu.
+	\item On appelle constructeurs ce qui est nommé builder au sein de la bibliothèque UsainBoltz.
 	\item On note $|t|_z$ la taille d'un tuple $t$ en tant qu'objet d'une classe combinatoire.
 \end{itemize}
 
 Quelques éléments de simplification par rapport aux vraix algorithmes point et unpoint:
 \begin{itemize}
 	\item on considère qu'il existe une règle $Zero$ qui correspond à la classe vide, cette classe est utilisée en lieu et place des simplifications qui ont place dans le vrai algorithme Point.
-	\item on ne prend pas en compte le fait que le générateur génère la structure par étape en s'arrêtant aux classes auxiliaires et que unpoint fait de même. On suppose que les deux gèrent les tuples de la racine jusqu'aux feuilles.
 \end{itemize}
 
-La première étape est inspirée des arbres de preuves.
+Commençons par définir le système de type dans lequel nous allons travailler, un objet de type $\alpha$ est
+\begin{align*}
+\alpha = & Atom & \\
+|& Epsilon & \\
+|& Marker(string) & \\
+|& (1, \alpha) \cup ... \cup (n, \alpha) & \forall n \in \mathbb{N}^{*}\\
+|& \alpha \times ... \times \alpha & \\
+|& List \;\alpha & \\
+|& Built(Pas\;mon\;probleme) &	%Temporaire
+\end{align*}
+
+Un constructeur est de type: $\alpha \rightarrow \alpha$. 
+
+Le générateur d'Usainboltz fonctionne à l'aide d'un algorithme que l'on note $B$, cet algorithme prend en argument une règle et en déduit un constructeur pour cette règle. Il est possible de décrire le comportement de cet algorithme en donnant le type des constructeurs renvoyés. Pour ce faire, on s'aide d'un ensemble de règles d'inférences de types que l'on décrit ici.
 
 \begin{definition}[Tuple acceptable pour une règle.]
-Pour $G$ une grammaire, $A$ une règle de cette grammaire, $t$ un tuple, on dit que $t$ est acceptable pour $A$ et on note $G:A \vdash t$ si cette proposition peut être déduite des règles d'inférences que nous allons lister.
+Le contexte noté $\Gamma$ est la donnée d'une grammaire et un ensemble de constructeurs: $\alpha \rightarrow Built(_)$, chaque constructeur est associé à une classe auxiliaire de manière à ce que chaque classe auxiliare soit associée à un constructeur.
 
-$$\inference{}{G:Epsilon()\vdash ('epsilon')}[Epsilon]$$
+Pour un contexte $\Gamma$, pour $A$ une règle de la grammaire de $\Gamma$, $t$ un type de constructeur, $B(A)$ est de type $t$ pour $\Gamma$ et on note $\Gamma:B(A) \vdash t$ si cette proposition peut être déduite des règles d'inférences que nous allons lister.
 
-$$\inference{}{G:Atom()\vdash ('z')}[Atom]$$
+$$\inference{}{\Gamma\vdash B(Epsilon()): Epsilon -> Epsilon}[Epsilon]$$
 
-$$\inference{}{G:Marker('a')\vdash ('a')}[Marker]$$
+$$\inference{}{\Gamma\vdash B(Atom()): Atom -> Atom}[Atom]$$
 
-$$\inference{i \in [1; n] \quad G:A_i\vdash t}{G:A_1 + ... + A_n\vdash (i, t)}[Union]\;n\ge 2$$
+$$\inference{}{\Gamma\vdash B(Marker('a')): Marker('a') -> Marker('a')}[Marker]$$
 
-$$\inference{G:A_1\vdash t_1\quad ...\quad G:A_n \vdash t_n}{G:A_1 \times ... \times A_n\vdash (t_1,...,t_n)}[Product]\;n\ge 2$$
+$$\inference{\forall i \in [1; n] \quad \Gamma\vdash \alpha_i \rightarrow \alpha}{\Gamma\vdash B(A_1 + ... + A_n): (1,\alpha_1) \cup ... \cup (n,\alpha_n) \rightarrow \alpha}[Union]\;n\ge 1$$
 
-$$\inference{G:A \vdash t_1\quad ...\quad G:A \vdash t_n}{G:Seq(A) \vdash (t_1,...,t_n)}[Sequence]$$
+$$\inference{\Gamma\vdash B(A_1): \alpha_1 \rightarrow \alpha_1' \quad ...\quad \Gamma\vdash B(A_n): \alpha_n \rightarrow \alpha_n' }{\Gamma\vdash B(A_1 \times ... \times A_n): \alpha_1\times ...\times \alpha_n \rightarrow \alpha_1' \times ... \times \alpha_n'}[Product]\;n\ge 2$$
 
-$$\inference{\text{$A$ est une classe auxiliaire associée à la règle $R$ dans $G$} \quad G:R\vdash t}{G:A\vdash t}[Simplifiction]$$
+$$\inference{\Gamma \vdash B(A): \alpha \rightarrow \alpha'}{\Gamma\vdash B(Seq(A)): List\;\alpha \rightarrow List\;\alpha'}[Sequence]$$
+(
+$$\inference{\text{$A$ est une classe auxiliaire associée à la règle $R$ dans $G$ et au constructeur de type: $\alpha \rightarrow \beta$} \quad \Gamma\vdash B(R): \alpha' \rightarrow \alpha}{\Gamma\vdash B(A): \beta \rightarrow \beta}[Simplifiction]$$
 \end{definition}
+
+On décrit maintenant l'algorithme Unpoint qui à une règle $A$ et un constructeur pour cette règle, associe un constructeur pour $A^{\bullet}$. Si $B(A^{\bullet}): \alpha \rightarrow _$ et $B(A): _ \rightarrow \alpha'$, on veut que $Unpoint(A, B(A)): \alpha \rightarrow \alpha'$. On définit cet algorithme par récurrence.
+\begin{align*}
+Unpoint(A, B(A))(t) = correspond (A,t)\\
+&|(Atom(), Atom()) &\rightarrow Renvoyer\;Atom() \\
+&|(A_1 + ... + A_n, (i, t')) &\rightarrow B(A)(i, Unpoint(A_i, B(A_i))(t')) \\
+&|(A_1 \times ... \times A_n, (t_1, ..., t_n)) &\rightarrow B(A)(Unpoint(A_1, B(A_1)(t_1)), ..., Unpoint(A_n, B(A_n)(t_n)))\\
+&|()
+&|(A \text{ une classe auxiliaire}, t) \rightarrow t
+\end{align*}
+
+La première étape est inspirée des arbres de preuves.
 
 À l'aide entre autre de cette théorie, il faut alors montrer les trois théorèmes suivants:
 \begin{theorem}[Unpoint réalise bien une opération de dépointage]
