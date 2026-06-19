@@ -7,12 +7,30 @@
 \newtheorem{lemme}{Lemme}
 \newtheorem{definition}{Definition}
 
-\lstset{language=Python}
-
+\lstset {
+    language=Python,                  % language code
+    basicstyle=\footnotesize,      % font size
+    numbers=none,                  % where to put line numbers
+    numberstyle=\footnotesize,     % numbers size
+    numbersep=5pt,                 % how far the line numbers are from the code
+    showspaces=false,                          % show spaces (with underscores)
+    showstringspaces=false,            % underline spaces within strings
+    showtabs=false,                            % show tabs using underscores
+    frame=single,                  % adds a frame around the code
+    tabsize=4,                     % default tabsize
+    breaklines=true,                  % automatic line breaking
+    columns=fullflexible,
+    breakautoindent=false,
+    framerule=1pt,
+    xleftmargin=0pt,
+    xrightmargin=0pt,
+    breakindent=0pt,
+    resetmargins=true
+}
 \begin{document}
 Éléments de théorie pour la création des constructeurs. Le but de ce petit article est de donner la base de la théorie pour prouver la correction de l'algorithme qui construit les constructeurs pointés.
 
-Les constructeurs font appel à des tuples imbriqués comme arguments, la première question est donc de savoir à quelles conditions un tuple peut-être considéré comme valide pour une règle. Il faudra ensuite montrer que des tuples pointés sont envoyés par l'algorithme vers des tuples non pointés. Enfin, il faut s'assurer que $n$ tuples pointés de taille $n$ (en tant qu'objet d'une classe combinatoire) sont envoyés vers un seul tuple non pointé de taille $n$. Cela devrait suffire.
+Les constructeurs font appel à des tuples imbriqués comme arguments, la première question est donc de savoir à quelles conditions un tuple peut-être considéré comme valide pour une règle. Il faudra ensuite montrer que des tuples pointés sont envoyés par l'algorithme vers des tuples non pointés. Enfin, il faut s'assurer que $n$ tuples pointés de tailles $n$ (en tant qu'objets d'une classe combinatoire) sont envoyés vers un seul tuple non pointé de taille $n$. Cela devrait suffire.
 
 Quelques éléments de définition:
 \begin{itemize}
@@ -27,56 +45,119 @@ Quelques éléments de simplification par rapport aux vraix algorithmes point et
 	\item on suppose que les constructeurs prennent toujours en argument des tuples et renvoients des tuples. Dans le cas de règles itérées qui renvoient en réalités de listes, on suppose que ces listes sont des tuples. Pour tout autre objet n'étant pas un tuple renvoyé (que ce soit par les constructeurs par défaut pour atoms, epsilons et markers, ou par les constructeurs fournis par l'utilisateur), on suppose que c'est un tuple contenant un seul élément.
 \end{itemize}
 
-On commence par définir l'algorithme de dépointage:
+On commence par définir l'algorithme de pointage d'une règle. Les règles sont supposées connues. Le code même si il ressemble à du Python est en réalité du pseudo code, du pseudo-python si vous voulez.
+\begin{lstlisting}
+#On se permet les raccourcis suivant: None-1 = None; (i-j) = max(0, i-j). Tres utile pour les contraintes de taille qui peuvent etre non specifies et ne doivent pas passer sous zero.
+def Point(A: Rule) -> Rule:
+	switch type(A):
+		case Atom():
+			return Atom()
+		case Epsilon() | Marker(_) | Zero():
+			return Zero()
+		case Union(A1, ..., An):
+			return Union(Point(A1), ..., Point(An))
+		case Product(A1, ..., An):
+			return Union(	
+				Product(Point(A1), A2, ..., An),
+				...,
+				Product(A1, ..., Point(An))
+		case RuleName(name):
+			return RuleName(name + "_P")
+		case Set(A, leq = i, geq = j):
+			return Product(A, Set(Point(A), leq = i-1, geq = j-1))
+		case Cycle(A, leq = i, geq = j):
+			return Product(A, Seq(Point(A), leq = i-1, geq = j-1))
+		case Seq(A, leq = None, geq = None):
+			return Union(Product(Seq(A, eq = 0), Point(A), Seq(A)))
+		case Seq(A, leq = i, geq = j):
+			#avec i != None.
+			return Union(
+				Product(Seq(A, eq = 0), Point(A), Seq(A, leq = i-1, geq = j-1)),
+				Product(Seq(A, eq = 1), Point(A), Seq(A, leq = i-2, geq = j-2)),
+				...,
+				Product(Seq(A, eq = i-1), Point(A), Seq(A, leq = 0, geq = j-i)))
+		case Seq(A, leq = None, geq = j):
+			#avec j != None
+			return Union(
+				Product(Seq(A, eq = 0), Point(A), Seq(A, leq = None, geq = j-1)),
+				...,
+				Product(Seq(A, eq = j-2), Point(A), Seq(A, leq = None, geq = 1)),
+				Product(Seq(A, geq = j-1), Point(A), Seq(A)))
+\end{lstlisting}
+
+On définit maintenant l'algorithme de dépointage:
 
 \begin{lstlisting}
 def Unpoint(A: Rule, t: tuple) -> tuple:
-	swith type(A):
+	switch type(A):
 		case Union(A1, ..., An):
 			(i, tu) = t
 			return (i, Unpoint(Ai, tu))
 		case Product(A1, ..., An):
 			(i, (t1, ..., tn)) = t
 			return (t1, ..., Unpoint(Ai, ti), ..., tn)
-		case Seq(A):
-			(t1, (t2, ..., tn)) = t
-			return (Unpoint(A, t1), t2, ..., tn)
 		case RuleName(_):
-			#A associé à la règle R et au constructeur B. 
-			return B((Unpoint(R,t))
+			return t
+		case Cycle(A) | Set(A):
+			(t1, (t2, ..., tn))
+			return (Unpoint(A, t1), t2, ..., tn)
+		case Seq(A):
+			(_, ((t_left_1, ..., t_left_n), t_pointed, (t_right_1, ..., t_right_m))) = t
+			return (t_left_1, ..., t_left_n, Unpoint(A, t_mid), t_right_1, ..., t_right_m)
 \end{lstlisting}
+
+Pour, voici une définition plus formelle de $|t|_z$: 
+\begin{align*}
+|t|_z = 
+\end{align*}
 
 Passons à la preuve,
 \begin{definition}[Tuple acceptable pour une règle.]
 Un contexte $\Gamma$ est la donnée d'une grammaire $G$ et d'un dictionnaire qui associe à chaque classe auxiliaire une fonction qui prend en argument un tuple acceptacle pour la classe auxiliaire et qui renvoie un nouvel objet.
-Pour $G$ une grammaire, $A$ une règle de cette grammaire, $t$ un tuple, on dit que $t$ est acceptable pour $A$ et on note $G:A \vdash t$ si cette proposition peut être déduite des règles d'inférences que nous allons lister.
+Pour $\Gamma$ un contexte, $A$ une règle de la grammaire de $\Gamma$, $t$ un tuple, on dit que $t$ est acceptable pour $A$ et on note $G:A \vdash t$ si cette proposition peut être déduite des règles d'inférences que nous allons lister.
 
-$$\inference{}{G:Epsilon()\vdash ('epsilon')}[Epsilon]$$
+$$\inference{}{\Gamma:Epsilon()\vdash Epsilon()}[Epsilon]$$
 
-$$\inference{}{G:Atom()\vdash ('z')}[Atom]$$
+$$\inference{}{\Gamma:Atom()\vdash Atom()}[Atom]$$
 
-$$\inference{}{G:Marker('a')\vdash ('a')}[Marker]$$
+$$\inference{}{\Gamma:Marker('a')\vdash Marker('a')}[Marker]$$
 
-$$\inference{i \in [1; n] \quad G:A_i\vdash t}{G:A_1 + ... + A_n\vdash (i, t)}[Union]\;n\ge 2$$
+$$\inference{i \in [1; n] \quad \Gamma:A_i\vdash t}{\Gamma:A_1 + ... + A_n\vdash (i, t)}[Union]\;n\ge 2$$
 
-$$\inference{G:A_1\vdash t_1\quad ...\quad G:A_n \vdash t_n}{G:A_1 \times ... \times A_n\vdash (t_1,...,t_n)}[Product]\;n\ge 2$$
+$$\inference{\Gamma:A_1\vdash t_1\quad ...\quad \Gamma:A_n \vdash t_n}{\Gamma:A_1 \times ... \times A_n\vdash (t_1,...,t_n)}[Product]\;n\ge 2$$
 
-$$\inference{G:A \vdash t_1\quad ...\quad G:A \vdash t_n}{G:Seq(A) \vdash (t_1,...,t_n)}[Sequence]$$
+$$\inference{\Gamma:A \vdash t_1\quad ...\quad \Gamma:A \vdash t_n}{\Gamma:Seq(A) \vdash (t_1,...,t_n)}[Sequence]$$
 
-$$\inference{\text{$A$ est une classe auxiliaire associée à la règle $R$ et la fonction $B$ dans $G$} \quad G:R\vdash t}{G:A\vdash B(t)}[Simplifiction]$$
+$$\inference{\text{$A$ est une classe auxiliaire associée à la règle $R$ et la fonction $B$ dans $G$} \quad \Gamma:R\vdash t}{\Gamma:A\vdash (t,B(t))}[Simplifiction]$$
+La règle de simplification fait apparaître au dénominateur $t$ et $B(t)$ au lien de juste $t$ pour obtenir certains théorèmes dans le cadre de cette théorie. En pratique, le $t$ n'est pas nécessaire et on peut juste garder $B(t)$.
 \end{definition}
 
-À l'aide entre autre de cette théorie, il faut alors montrer les trois théorèmes suivants:
+On définit aussi le pointage d'un contexte:
+\begin{definition}[Contexte pointé]
+Soit $\Gamma = \{G, A_1: B_1, ..., A_n: B_n\}$ un contexte. On définit le contexte pointé $\Gamma^{\bullet}$ par:$$\Gamma^{\bullet} = \{G^\bullet, A_1: B_1, ..., A_n: B_n, A_1^{\bullet}: B_1^{\bullet}, ..., A_n^{\bullet}: B_n^{\bullet}\}$$ où $B_i^{\bullet}(t) = B_i(Unpoint(t,R_i))$ avec $A_i: R_i \in G$.
+\end{definition}
+
+Enfin, on donne une définition plus formelle de $|t|_z$:
+\begin{align*}
+|t|_z &= &\\
+&| t = (t', B(t'))&\rightarrow &|t'|_z \\
+&| t = (i, t') &\rightarrow &|t'|_z\\
+&| t = (t_1, ..., t_n) &\rightarrow &|t_1|_z + ... + |t_n|_z \\
+&| t = Atom() &\rightarrow& 1\\
+&| t = Epsilon() | t = Marker(_) &\rightarrow &0
+\end{align*}
+
+On peut maintenant montrer les trois théorèmes suivants.
 \begin{theorem}[Unpoint réalise bien une opération de dépointage]
-Soit $G$, $A$, $t$ une grammaire, une règle et un tuple tel que $A$ apparaisse dans $G$. $G^{\bullet}:A^{\bullet} \vdash t$ si et seulement si $Unpoint(t,A)$ est correctement défini et $G:A \vdash Unpoint(t,A)$.
+Soit $\Gamma$, $A$, $t$ un contexte, une règle et un tuple tel que $A$ apparaisse dans $G$. $\Gamma^{\bullet}:A^{\bullet} \vdash t$ si et seulement si $Unpoint(t,A)$ est correctement défini et $\Gamma:A \vdash Unpoint(t,A)$.
 \end{theorem}
 
 \begin{theorem}[Unpoint respecte la taille des tuples]
-Soit $G$, $A$, $t$ tel qe $G^{\bullet}: A^{\bullet} \vdash t$. Alors $|Unpoint(t,A)|_z = |t|_z$.
+Soit $\Gamma$, $A$, $t$ tel qe $\Gamma^{\bullet}: A^{\bullet} \vdash t$. Alors $|Unpoint(t,A)|_z = |t|_z$.
 \end{theorem}
 
 \begin{theorem}[Il y a $n$ tuples pointés pour un tuple non pointé de taille $n$]
-Soit $G$, $A$, $t$, tel que $G^{\bullet}: A^{\bullet} \vdash t$, alors $|Unpoint^{-1}(\{t\}, A)| = |t|_z$.
+Soit $\Gamma$, $A$, $t$, tel que $\Gamma^{\bullet}: A^{\bullet} \vdash t$, alors $|Unpoint^{-1}(\{t\}, A)| = |t|_z$.
 \end{theorem}
 
 L'idée de le preuve est la même pour les trois, une induction sur $A$.
@@ -84,11 +165,11 @@ L'idée de le preuve est la même pour les trois, une induction sur $A$.
 On commence par prouver un petit lemme utile:
 
 \begin{lemme}
-Soit $G$, $A$, $t$ une grammaire, une règle et un tuple. On a $G^{\bullet}: A \vdash t$ avec $A$ une règle apparaissant dans $G$ si et seulement si $G: A \vdash t$.
+Soit $\Gamma$, $A$, $t$ un contexte, une règle et un tuple. On a $\Gamma^{\bullet}: A \vdash t$ avec $A$ une règle apparaissant dans $G$ si et seulement si $\Gamma: A \vdash t$.
 \end{lemme}
 
 \begin{proof}
-Dans le sens direct, l'opération de pointage fait apparaître de nouvelles règles mais n'en supprime ni n'en modifie aucune. Donc $A$ n'a pas été modifié, donc l'arbre de preuve utilisé pour obtenir que $G^{\bullet}: A\vdash t$ permet de prouver $G: A\vdash t$.
+Dans le sens direct, l'opération de pointage fait apparaître de nouvelles règles mais n'en supprime ni n'en modifie aucune. Donc $A$ n'a pas été modifié, donc l'arbre de preuve utilisé pour obtenir que $\Gamma^{\bullet}: A\vdash t$ permet de prouver $\Gamma: A\vdash t$.
 
 On utilise le même argument dans l'autre sens.
 \end{proof}
@@ -104,22 +185,40 @@ $A = Epsilon()$ donc $A^{\bullet} = Zero()$, on ne peut pas avoir $Zero() \vdash
 $Marker()$ et $Zero()$ sont très similaires à $Epsilon()$.
 
 	\item
-$A = Atom()$ donc $A^{\bullet} = Atom()$. On a donc $Unpoint(t,A) = t$. Si $G^{\bullet}: Atom() \vdash t$, alors on peut utiliser la seule règle d'inférence faisant intervenir l'atome pour en déduire que $t = ('z')$. Donc, en appliquant cette même règle d'inférence on en déduit que $G: Atom() \vdash t$. Le sens inverse est identique.
+$A = Atom()$ donc $A^{\bullet} = Atom()$. On a donc $Unpoint(t,A) = t$. Si $\Gamma^{\bullet}: Atom() \vdash t$, alors on peut utiliser la seule règle d'inférence faisant intervenir l'atome pour en déduire que $t = Atom()$. Donc, en appliquant cette même règle d'inférence on en déduit que $G: Atom() \vdash t$. Le sens inverse est identique.
 \end{itemize}
 
 Cas récursifs:
 \begin{itemize}
 	\item
-$A = A_1 + ... + A_n$, alors $A^{\bullet} = A_1^{\bullet} + ... + A_n^{\bullet}$. On applique l'unique règle d'inférence associée à l'union, on en déduit que $t = (i,t')$ avec $1 \le i \le n$ et $G^{\bullet}: A_i^{\bullet} \vdash t'$. $A$ apparait dans $G$, donc $A_i$ apparait dans $G$, on peut donc utiliser notre induction. Par hypothèse d'induction, $G: A_i \vdash Unpoint(t', A_i)$ et donc, en appliquant la règle d'inférence pour l'union, $$G: A \vdash (i,Unpoint(t', A_i)) = Unpoint((i,t'), A) = Unpoint(t, A)$$. Le sens réciproque est identique.
+$A = A_1 + ... + A_n$, alors $A^{\bullet} = A_1^{\bullet} + ... + A_n^{\bullet}$. On applique l'unique règle d'inférence associée à l'union, on en déduit que $t = (i,t')$ avec $1 \le i \le n$ et $\Gamma^{\bullet}: A_i^{\bullet} \vdash t'$. $A$ apparait dans $G$, donc $A_i$ apparait dans $G$, on peut donc utiliser notre induction. Par hypothèse d'induction, $\Gamma: A_i \vdash Unpoint(t', A_i)$ et donc, en appliquant la règle d'inférence pour l'union, $$\Gamma: A \vdash (i,Unpoint(t', A_i)) = Unpoint((i,t'), A) = Unpoint(t, A)$$. Le sens réciproque est identique.
 
 	\item
-$A = A_1 \times ... \times A_n$, alors $A^{\bullet} = A_1^{\bullet}\times A_2 \times ... \times A_n + ... + A_1 \times ... \times A_{n-1} \times A_n^{\bullet}$. En appliquant la règle d'inférence pour l'union, on en déduit que $t = (i, t')$ avec $t' = (t_1, ..., t_n)$. Puisque $G^{\bullet}: A_1 \times ... \times A_i^{\bullet} \times ... \times A_n \vdash (t_1, ..., t_n)$, on peut cette fois ci appliquer la règle d'inférence pour le produit. Alors, pour $j\ne i$ $G^{\bullet}: A_j \vdash t_j$, or $A_j$ apparait dans $G$ car $A$ apparait dans $G$, donc on peut appliquer notre lemme pour obtenir que $G: A_j \vdash t_j$. Par hypothèse d'induction, on sait aussi que $G: A_i \vdash Unpoint(t_i, A_i)$, on peut utiliser l'inférence pour le produit pour en déduire que $$G: A_1 \times ... \times A_n \vdash (t_1, ..., Unpoint(t_i, A_i), ..., t_n) = Unpoint(t,A)$$ Le sens réciproque est identique.
+$A = A_1 \times ... \times A_n$, alors $A^{\bullet} = A_1^{\bullet}\times A_2 \times ... \times A_n + ... + A_1 \times ... \times A_{n-1} \times A_n^{\bullet}$. En appliquant la règle d'inférence pour l'union, on en déduit que $t = (i, t')$ avec $t' = (t_1, ..., t_n)$. Puisque $\Gamma^{\bullet}: A_1 \times ... \times A_i^{\bullet} \times ... \times A_n \vdash (t_1, ..., t_n)$, on peut cette fois ci appliquer la règle d'inférence pour le produit. Alors, pour $j\ne i$ $G^{\bullet}: A_j \vdash t_j$, or $A_j$ apparait dans $G$ car $A$ apparait dans $G$, donc on peut appliquer notre lemme pour obtenir que $G: A_j \vdash t_j$. Par hypothèse d'induction, on sait aussi que $\Gamma: A_i \vdash Unpoint(t_i, A_i)$, on peut utiliser l'inférence pour le produit pour en déduire que $$\Gamma: A_1 \times ... \times A_n \vdash (t_1, ..., Unpoint(t_i, A_i), ..., t_n) = Unpoint(t,A)$$ Le sens réciproque est identique.
 
 	\item
-Si $A$ est une classe auxiliaire, la seule règle appliquable est la simplifcation, on a donc $A^{\bullet}: R \in G^{\bullet}$, or $A$ apparait dans $G$. Par définition du pointage, il existe $T$ tel que $T^{\bullet} = R$ et $A: T\in G$.
-Par hypothèse, $G^{\bullet}: A^{\bullet} \vdash t$, or le constructeur associé à $A$ est forcément l'identité car l'utilisateur n'a pas pu en fournir un autre, donc $G^{\bullet}: R \vdash t$. On conclut par hypothèse d'induction et application de la règle de simplification. Le sens réciproque est identique.
+Si $A$ est une classe auxiliaire, la seule règle appliquable est la simplifcation. Il existe donc un $t$ et une règle $R$ associée à A tel que $\Gamma^{\bullet}: A^{\bullet} \vdash B^\bullet(t)$ et $\Gamma^{\bullet}: R^{\bullet} \vdash t$. Par induction, $\Gamma: R\vdash Unpoint(t, R)$ et par simplification, $$\Gamma: A\vdash B(Unpoint(t, R)) = B^{\bullet}(t) = Unpoint(B^{\bullet}(t),A)$$
+Le sens invevrse est identique.
 \end{itemize}
 
 \end{proof}
 
+\begin{proof}[Unpoint respecte la taille des tuples]
+Cas de bases:
+\begin{itemize}
+	\item
+$A = Epsilon()$, comme expliqué plus haut, ce cas ne peut pas se produire.
+	\item
+Il en va de même pour $Marker(_)$ et $Epsilon()$.
+	\item
+$A = Atom()$, alors $t = Atom()$, donc $t = Unpoint(t,A)$ et donc $|t|_z = Unpoint(t, A)_z$.
+\end{itemize}
+Cas récursifs:
+\begin{itemize}
+	\item
+$A = A_1 + ... + A_n$, donc $t = (i, t')$. Par induction, $|Unpoint(t', A_i)|_z = |t'|_z$. Or, $|(i, t')|_z = |t'|_z$ et $Unpoint((i, t'), A) = Unpoint(t', A_i)$, ce qui est suffisant pour conclure.
+	\item
+$A$ est une classe auxiliaire. On se donne $t'$, $B$ et $R$ tel que: $t = (t', B(t'))$ et $\Gamma^{\bullet}: R^{\bullet} \vdash t'$. À nouveau, on peut conclure en appliquant l'induction. 
+\end{itemize}
+\end{proof}
 \end{document}

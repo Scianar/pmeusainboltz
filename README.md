@@ -5,6 +5,7 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 # feuille de route 
 À peu près dans l'ordre de priorité:
 
+#-----------------------------------------------------------Phase: début du stage
 - Gérer les rulenames se pointant vers un ensemble vide.
 (Fait)
 
@@ -24,9 +25,34 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 (Entamé)
 
 - Ajout de la gestion des arguments pour certaines constructions de classes.
-(Fait (presque))
+(Fait)
 
 - Intégration de la méthode de pointage dans la bibliothèque UsainBoltz.
 (Git sur gitlab)
+#----------------------------------------------------------- Phase close.
 
-- (Mise en place de MSET et cycle non étiquetée)
+#----------------------------------------------------------- Mise au propre de ce qui a été fait.
+
+- Finir la formalisation.
+(Entamé)
+	- Rajout du pointage de contexte.
+- Trouver quelques exemples pour le pointage.
+
+- Tout relire.
+
+-
+
+
+
+
+
+
+
+
+
+
+
+
+
+#---------------------------
+- Mise en place de MSET et cycle non étiqueté.
