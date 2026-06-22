@@ -34,25 +34,15 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 #----------------------------------------------------------- Mise au propre de ce qui a été fait.
 
 - Finir la formalisation.
-(Entamé)
+(Entamé, dernière preuve à construire, peut-être complété autres preuves et rajouté règles d'inférences)
 	- Rajout du pointage de contexte.
+	(Fait)
+
 - Trouver quelques exemples pour le pointage.
+(Trouver solution pour oracle et À mettre au propre)
 
 - Tout relire.
-
--
-
-
-
-
-
-
-
-
-
-
-
-
+(Fait pour grammar.py)
 
 #---------------------------
 - Mise en place de MSET et cycle non étiqueté.

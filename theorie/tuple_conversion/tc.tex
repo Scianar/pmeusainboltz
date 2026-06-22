@@ -3,8 +3,10 @@
 \usepackage{semantic}
 \usepackage{listings}
 \newtheorem{theorem}{Theorem}
+\newtheorem{example}{Example}
 \newtheorem{proof}{Proof}
 \newtheorem{lemme}{Lemme}
+\newtheorem{corollary}{Corollary}
 \newtheorem{definition}{Definition}
 
 \lstset {
@@ -28,150 +30,189 @@
     resetmargins=true
 }
 \begin{document}
-Éléments de théorie pour la création des constructeurs. Le but de ce petit article est de donner la base de la théorie pour prouver la correction de l'algorithme qui construit les constructeurs pointés.
+Theory elements for the creation of builders. The goal of this article is to give some theoric tools to study builder pointing.
 
-Les constructeurs font appel à des tuples imbriqués comme arguments, la première question est donc de savoir à quelles conditions un tuple peut-être considéré comme valide pour une règle. Il faudra ensuite montrer que des tuples pointés sont envoyés par l'algorithme vers des tuples non pointés. Enfin, il faut s'assurer que $n$ tuples pointés de tailles $n$ (en tant qu'objets d'une classe combinatoire) sont envoyés vers un seul tuple non pointé de taille $n$. Cela devrait suffire.
+Builders use nested tuples as arguments, the first question is then to understand at which condition a tuple can be considered valid for a rule. Then, it will be demonstrated that pointed tuple are converted by the algorithm to non pointed tuples. Finally, unpointing need to ensure that a non pointed tuple of size $n$ (as a combinatorial object) has exactly $n$ pointed tuple of size $n$ mapped to it by the algorithm.
 
-Quelques éléments de définition:
+Some definitions elements:
 \begin{itemize}
-	\item On appelle classes auxiliaires les règles correspondant aux RuleName dans la bibliothèque UsainBoltz.
-	\item On appelle constructeurs ce qu'on appelle builders au sein de la bibliothèque UsainBotlz.
-	\item On note $|t|_z$ la taille d'un tuple $t$ en tant qu'objet d'une classe combinatoire.
+	\item RuleName present in the UsainBoltz library are called non terminal.
+	\item a python tuple is noted with a prefix Tp: (1, 2) becomes Tp(1, 2).
+	Mathematical couples are noted normally.
 \end{itemize}
 
-Quelques éléments de simplification par rapport aux vraix algorithmes point et unpoint:
+Some aspects present in the real algorithms are simplified:
 \begin{itemize}
-	\item on considère qu'il existe une règle $Zero$ qui correspond à la classe vide, cette classe est utilisée en lieu et place des simplifications qui ont place dans le vrai algorithme de pointage.
-	\item on suppose que les constructeurs prennent toujours en argument des tuples et renvoients des tuples. Dans le cas de règles itérées qui renvoient en réalités de listes, on suppose que ces listes sont des tuples. Pour tout autre objet n'étant pas un tuple renvoyé (que ce soit par les constructeurs par défaut pour atoms, epsilons et markers, ou par les constructeurs fournis par l'utilisateur), on suppose que c'est un tuple contenant un seul élément.
+	\item there is a $Zero$ rule which corresponds to the empty class. This class will be used instead of simplifying as done in the real algorithms. 
+	\item we assume that builders always take as argument tuples and return tuples. For iterated rules, it is assumed that lists are tuples. For other objects (which are not tuples nor lists), they are considered to be a singleton with a single element.
 \end{itemize}
 
-On commence par définir l'algorithme de pointage d'une règle. Les règles sont supposées connues. Le code même si il ressemble à du Python est en réalité du pseudo code, du pseudo-python si vous voulez.
+We first define sub-right-rules:
+\begin{definition}
+A sub-right-rule (which can be read as a sub rule of the right of a production rule in a grammar) is defined by induction:
+$$Atom(),\;Epsilon(),\;Marker(name),\;RuleName(name) \text{    for name a character chain.}$$
+are sub-right-rules.
+\\\\
+If $R$, $R_1$, ..., $R_n$ are sub-right-rules,
+$$Union(R_1, ..., R_n), Product(R_1, ..., R_n), Seq(R), Set(R), Cycle(R)$$
+are sub-right-rules.
+
+For $R$ a sub-right-rule, we say that $S$ another sub-right-rule appear in $R$ if $R$ can be obtained by induction with $S$ as one of $R$ base element.
+\end{definition}
+
+\begin{example}
+$R = Union(Product(Atom(), Epsilon(), Epsilon()), Atom())$ is a sub-right-rule.
+\\
+$S_1 = Product(Atom(), Epsilon(), Epsilon())$ appears in $R$ because $Union(S_1, Atom()) = R$.
+\\
+$S_2 = Product(Atom(), Epsilon())$ doesn't appear in $R$ because $Product(Product(Atom(), Epsilon()), Epsilon()) \ne Product(Atom(), Epsilon(), Epsilon())$ (je sais pas comment finir ce cas).
+\end{example}
+
+From this definition we can define a grammar.
+\begin{definition}
+A grammar $G$ is a set of production rules where a production rule is a couple $(A, R)$ noted $A \rightarrow R$. $A$ is a RuleName called a non terminal of $G$ and $R$ is a sub-right-rule called a right-rule of $G$.
+\\
+We say that a sub-right-rule $S$ appears in $G$ if it appears in a right-rule of $G$.
+
+An additional condition on $G$ to be considered a grammar is that all sub-right-rules $A$ which are RuleNames also are non terminals of $G$ and each non terminal $G$ is only associated with a single right-rule.
+\end{definition}
+
+We define the pointing algorithm on a sub-right-rule. Even though this code looks like python, there are pseudo-code elements. We could say this is pseudo-python.
 \begin{lstlisting}
-#On se permet les raccourcis suivant: None-1 = None; (i-j) = max(0, i-j). Tres utile pour les contraintes de taille qui peuvent etre non specifies et ne doivent pas passer sous zero.
-def Point(A: Rule) -> Rule:
-	switch type(A):
+#Some shortcuts are allowed: None-1 = None; (i-j) = max(0, i-j). Very useful for sizes constraints.
+def Point(S: SubRightRule) -> SubRightRule:
+	switch S:
 		case Atom():
 			return Atom()
 		case Epsilon() | Marker(_) | Zero():
 			return Zero()
-		case Union(A1, ..., An):
-			return Union(Point(A1), ..., Point(An))
-		case Product(A1, ..., An):
+		case Union(R1, ..., Rn):
+			return Union(Point(R1), ..., Point(Rn))
+		case Product(R1, ..., Rn):
 			return Union(	
-				Product(Point(A1), A2, ..., An),
+				Product(Point(R1), R2, ..., Rn),
 				...,
-				Product(A1, ..., Point(An))
+				Product(R1, ..., Point(Rn))
 		case RuleName(name):
 			return RuleName(name + "_P")
-		case Set(A, leq = i, geq = j):
-			return Product(A, Set(Point(A), leq = i-1, geq = j-1))
-		case Cycle(A, leq = i, geq = j):
-			return Product(A, Seq(Point(A), leq = i-1, geq = j-1))
-		case Seq(A, leq = None, geq = None):
-			return Union(Product(Seq(A, eq = 0), Point(A), Seq(A)))
-		case Seq(A, leq = i, geq = j):
-			#avec i != None.
+		case Set(R, leq = i, geq = j):
+			return Product(R, Set(Point(R), leq = i-1, geq = j-1))
+		case Cycle(R, leq = i, geq = j):
+			return Product(R, Seq(Point(R), leq = i-1, geq = j-1))
+		case Seq(R, leq = None, geq = None):
+			return Union(Product(Seq(R, eq = 0), Point(R), Seq(R)))
+		case Seq(R, leq = i, geq = j):
+			#with i != None.
 			return Union(
-				Product(Seq(A, eq = 0), Point(A), Seq(A, leq = i-1, geq = j-1)),
-				Product(Seq(A, eq = 1), Point(A), Seq(A, leq = i-2, geq = j-2)),
+				Product(Seq(R, eq = 0), Point(R), Seq(R, leq = i-1, geq = j-1)),
+				Product(Seq(R, eq = 1), Point(R), Seq(R, leq = i-2, geq = j-2)),
 				...,
-				Product(Seq(A, eq = i-1), Point(A), Seq(A, leq = 0, geq = j-i)))
-		case Seq(A, leq = None, geq = j):
-			#avec j != None
+				Product(Seq(R, eq = i-1), Point(R), Seq(R, leq = 0, geq = j-i)))
+		case Seq(R, leq = None, geq = j):
+			#with j != None
 			return Union(
-				Product(Seq(A, eq = 0), Point(A), Seq(A, leq = None, geq = j-1)),
+				Product(Seq(R, eq = 0), Point(R), Seq(R, leq = None, geq = j-1)),
 				...,
-				Product(Seq(A, eq = j-2), Point(A), Seq(A, leq = None, geq = 1)),
-				Product(Seq(A, geq = j-1), Point(A), Seq(A)))
+				Product(Seq(R, eq = j-2), Point(R), Seq(R, leq = None, geq = 1)),
+				Product(Seq(R, geq = j-1), Point(R), Seq(R)))
 \end{lstlisting}
 
-On définit maintenant l'algorithme de dépointage:
+Now we define the tuple unpointing algorithm.
 
 \begin{lstlisting}
-def Unpoint(A: Rule, t: tuple) -> tuple:
-	switch type(A):
-		case Union(A1, ..., An):
-			(i, tu) = t
-			return (i, Unpoint(Ai, tu))
-		case Product(A1, ..., An):
-			(i, (t1, ..., tn)) = t
-			return (t1, ..., Unpoint(Ai, ti), ..., tn)
+def UnpointTp(t: tuple, S: SubRightRule) -> tuple:
+	switch S:
+		case Union(R1, ..., Rn):
+			Tp(i, tu) = t #This can raise an error if t has the wrong format.
+			return Tp(i, Unpoint(Ri, tu))
+		case Product(R1, ..., Rn):
+			Tp(i, Tp(t1, ..., tn)) = t
+			return Tp(t1, ..., Unpoint(Ri, ti), ..., tn)
 		case RuleName(_):
 			return t
-		case Cycle(A) | Set(A):
-			(t1, (t2, ..., tn))
-			return (Unpoint(A, t1), t2, ..., tn)
-		case Seq(A):
-			(_, ((t_left_1, ..., t_left_n), t_pointed, (t_right_1, ..., t_right_m))) = t
-			return (t_left_1, ..., t_left_n, Unpoint(A, t_mid), t_right_1, ..., t_right_m)
+		case Cycle(R) | Set(R):
+			Tp(t1, Tp(t2, ..., tn))
+			return Tp(Unpoint(R, t1), t2, ..., tn)
+		case Seq(R):
+			Tp(_, Tp(Tp(t_left_1, ..., t_left_n), t_pointed, Tp(t_right_1, ..., t_right_m))) = t
+			return Tp(t_left_1, ..., t_left_n, Unpoint(R, t_mid), t_right_1, ..., t_right_m)
+		case Epsilon() | Marker(_) | Zero():
+			raise Exception("Error")
 \end{lstlisting}
 
-Pour, voici une définition plus formelle de $|t|_z$: 
-\begin{align*}
-|t|_z = 
-\end{align*}
+\begin{definition}[Acceptable tuple for a sub-right-rule.]
+A context $\Gamma$ is a couple $(G, M)$ with $G$ a grammar and $M$ is a mapping from the set of non terminals in $G$ to builders. For $A \rightarrow R$ a production rule in $G$, the builder $\mathcal{B} = M(A)$ is a function from the set of right-hand acceptable tuples for $R$ to a set $E_\mathcal{B}$.
 
-Passons à la preuve,
-\begin{definition}[Tuple acceptable pour une règle.]
-Un contexte $\Gamma$ est la donnée d'une grammaire $G$ et d'un dictionnaire qui associe à chaque classe auxiliaire une fonction qui prend en argument un tuple acceptacle pour la classe auxiliaire et qui renvoie un nouvel objet.
-Pour $\Gamma$ un contexte, $A$ une règle de la grammaire de $\Gamma$, $t$ un tuple, on dit que $t$ est acceptable pour $A$ et on note $G:A \vdash t$ si cette proposition peut être déduite des règles d'inférences que nous allons lister.
+For $\Gamma$ a context, $S$ a sub-right-rule of $G$, $t^v$ and $t^b$ two tuples, we say that $(t^v, t^b)$ is acceptable for $S$ and we note $\Gamma: S\vdash (t^v, t^b)$ if this proposition can be deduced from the following inference rules:
 
-$$\inference{}{\Gamma:Epsilon()\vdash Epsilon()}[Epsilon]$$
+$$\inference{}{\Gamma:Epsilon()\vdash (Epsilon(), Epsilon())}[Epsilon]$$
 
-$$\inference{}{\Gamma:Atom()\vdash Atom()}[Atom]$$
+$$\inference{}{\Gamma:Atom()\vdash (Atom(), Atom())}[Atom]$$
 
-$$\inference{}{\Gamma:Marker('a')\vdash Marker('a')}[Marker]$$
+$$\inference{}{\Gamma:Marker('a')\vdash (Marker('a'), Marker('a'))}[Marker]$$
 
-$$\inference{i \in [1; n] \quad \Gamma:A_i\vdash t}{\Gamma:A_1 + ... + A_n\vdash (i, t)}[Union]\;n\ge 2$$
+$$\inference{i \in [1; n] \quad \Gamma:S_i\vdash (t^v, t^b)}{\Gamma:S_1 + ... + S_n\vdash (Tp(i, t^v), Tp(i, t^b))}[Union]\;n\ge 2$$
 
-$$\inference{\Gamma:A_1\vdash t_1\quad ...\quad \Gamma:A_n \vdash t_n}{\Gamma:A_1 \times ... \times A_n\vdash (t_1,...,t_n)}[Product]\;n\ge 2$$
+$$\inference{\Gamma:S_1\vdash (t^v_1, t^b_1)\quad ...\quad \Gamma:S_n \vdash (t^v_n, t^b_n)}{\Gamma:S_1 \times ... \times S_n\vdash (Tp(t^v_1,...,t^v_n), Tp(t^b_1, ..., t^b_n))}[Product]\;n\ge 2$$
 
-$$\inference{\Gamma:A \vdash t_1\quad ...\quad \Gamma:A \vdash t_n}{\Gamma:Seq(A) \vdash (t_1,...,t_n)}[Sequence]$$
+$$\inference{\Gamma:S \vdash (t^v_1, t^b_1)\quad ...\quad \Gamma:S \vdash (t^v_n, t^b_n)}{\Gamma:Seq(S) \vdash (Tp(t^v_1,...,t^v_n), Tp(t^b_1,...,t^b_n))}[Sequence]$$
 
-$$\inference{\text{$A$ est une classe auxiliaire associée à la règle $R$ et la fonction $B$ dans $G$} \quad \Gamma:R\vdash t}{\Gamma:A\vdash (t,B(t))}[Simplifiction]$$
-La règle de simplification fait apparaître au dénominateur $t$ et $B(t)$ au lien de juste $t$ pour obtenir certains théorèmes dans le cadre de cette théorie. En pratique, le $t$ n'est pas nécessaire et on peut juste garder $B(t)$.
+$$\inference{A \rightarrow R \in G \quad \Gamma:R\vdash (t^v, t^b)}{\Gamma:A\vdash (t^v, M(A)(t^b))}[Simplification]$$
+
+The $b$ in $t^b$ stands for $builder$ because $t^b$ is obtained by applying builders on the tuple. The $v$ in $t^v$ stands for $vanilla$ because no tuples have been used on $t^v$.
+
+$t^v$ is called a left-hand acceptable tuple for $S$ and $t^b$ a right-hand acceptable tuple.
 \end{definition}
 
-On définit aussi le pointage d'un contexte:
-\begin{definition}[Contexte pointé]
-Soit $\Gamma = \{G, A_1: B_1, ..., A_n: B_n\}$ un contexte. On définit le contexte pointé $\Gamma^{\bullet}$ par:$$\Gamma^{\bullet} = \{G^\bullet, A_1: B_1, ..., A_n: B_n, A_1^{\bullet}: B_1^{\bullet}, ..., A_n^{\bullet}: B_n^{\bullet}\}$$ où $B_i^{\bullet}(t) = B_i(Unpoint(t,R_i))$ avec $A_i: R_i \in G$.
+We now define pointing.
+\begin{definition}[Pointing]
+For any sub-right-rule $S$, S pointed noted $S^{\bullet}$ is $S^{\bullet} = Point(S)$.
+
+For a grammar $G = \{A_1\rightarrow R_1, ..., A_n\rightarrow R_n\}$, $G^{\bullet} = \{A_1\rightarrow R_1, ..., A_n\rightarrow R_n, A_1^{\bullet}\rightarrow R_1^{\bullet}, ..., A_n^{\bullet}\rightarrow R_n^{\bullet}\}$.
+
+For a context $\Gamma = (G, M)$, $\Gamma^{\bullet} = (G^{\bullet}, M^{\bullet})$. For $A \rightarrow R \in G$, $M^{\bullet}(A) = M(A)$ and $M^{\bullet}(A^{\bullet})(t^{b\bullet}) = M(A)(Unpoint(t^{b\bullet}, R))$ where $t^{b\bullet}$ is a right acceptable tuple for $R^{\bullet}$. As it will be seen later, $M(A)(Unpoint(t^{b\bullet}, R))$ is correctly defined.
 \end{definition}
 
-Enfin, on donne une définition plus formelle de $|t|_z$:
+Finally we define the size of a left-hand tuple: $|t^v|_z$
 \begin{align*}
-|t|_z &= &\\
-&| t = (t', B(t'))&\rightarrow &|t'|_z \\
-&| t = (i, t') &\rightarrow &|t'|_z\\
-&| t = (t_1, ..., t_n) &\rightarrow &|t_1|_z + ... + |t_n|_z \\
-&| t = Atom() &\rightarrow& 1\\
-&| t = Epsilon() | t = Marker(_) &\rightarrow &0
+|t^v|_z &= &\\
+&| t^v = Tp(i, t^{v'}) &\rightarrow &|t^{v'}|_z\\
+&| t^v = Tp(t^v_1, ..., t^v_n) &\rightarrow &|t^v_1|_z + ... + |t^v_n|_z \\
+&| t^v = Atom() &\rightarrow& 1\\
+&| t^v = Epsilon() | t^v = Marker(\_) &\rightarrow &0
 \end{align*}
 
-On peut maintenant montrer les trois théorèmes suivants.
-\begin{theorem}[Unpoint réalise bien une opération de dépointage]
-Soit $\Gamma$, $A$, $t$ un contexte, une règle et un tuple tel que $A$ apparaisse dans $G$. $\Gamma^{\bullet}:A^{\bullet} \vdash t$ si et seulement si $Unpoint(t,A)$ est correctement défini et $\Gamma:A \vdash Unpoint(t,A)$.
+The theory to prove the three following theorems has now been established.
+\begin{theorem}[UnpointTp is an unpointing operation.]
+Let $\Gamma = (G, M)$ be a context, $R$ a sub-right-rule appearing in $G$ and $t^v, t^b$ tuples.
+ 
+ $\Gamma^{\bullet}:R^{\bullet} \vdash (t^{v\bullet}, t^{b\bullet})$ if and only if $Unpoint(t^{v\bullet}, R)$ is correctly defined, $Unpoint(t^{b\bullet}, R)$ is correctly defined and $\Gamma:R \vdash (UnpointTp(t^{v\bullet}, R), UnpointTp(t^{b\bullet}, R))$.
 \end{theorem}
 
-\begin{theorem}[Unpoint respecte la taille des tuples]
-Soit $\Gamma$, $A$, $t$ tel qe $\Gamma^{\bullet}: A^{\bullet} \vdash t$. Alors $|Unpoint(t,A)|_z = |t|_z$.
+\begin{corollary}
+For a context $\Gamma = (G, M)$, $A \rightarrow R \in G$, $t^{b\bullet}$ a tuple. If $t^{b\bullet}$ is a right-hand acceptable tuple for $R^{\bullet}$. Then $M(A)(Unpoint(t^{b\bullet}, R))$ is correctly defined. Therefore $M^{\bullet}(A^{\bullet})$ is correctly defined.
+\end{corollary}
+
+\begin{theorem}[UnpointTp respects the size of tuples]
+Let $\Gamma = (G, M)$ be a context, $R$ a sub-right-rule appearing in $G$ and $t^{v\bullet}, t^{b\bullet}$ tuples such that $\Gamma^{\bullet}: R^{\bullet} \vdash (t^{v\bullet}, t^{b\bullet})$. Then $UnpointTp(t^{v\bullet}, R)|_z = |t^{v\bullet}|_z$.
 \end{theorem}
 
-\begin{theorem}[Il y a $n$ tuples pointés pour un tuple non pointé de taille $n$]
-Soit $\Gamma$, $A$, $t$, tel que $\Gamma^{\bullet}: A^{\bullet} \vdash t$, alors $|Unpoint^{-1}(\{t\}, A)| = |t|_z$.
+\begin{theorem}[For $n$ tuples pointed of size $n$ there is one non pointed tuple]
+Let $\Gamma = (G, M)$ be a context, $R$ a sub-right-rule appearing in $G$ and $t^v, t^b$ tuples such that $\Gamma: R \vdash (t^v, t^b)$. Then $\{t^{v\bullet} | UnpointTp(t^{v\bullet}, R) = t^v \text{ and $t^v$ is left-hand acceptable for $R^{\bullet}$}\} = |t^v|_z$.
 \end{theorem}
 
-L'idée de le preuve est la même pour les trois, une induction sur $A$.
+All three theorems will be proven by an induction on sub-right-rules.
 
-On commence par prouver un petit lemme utile:
+But first we need to prove a small lemma.
 
 \begin{lemme}
-Soit $\Gamma$, $A$, $t$ un contexte, une règle et un tuple. On a $\Gamma^{\bullet}: A \vdash t$ avec $A$ une règle apparaissant dans $G$ si et seulement si $\Gamma: A \vdash t$.
+Let $\Gamma = (G,M)$ a context, $R$ a sub-right-rule appearing in $G$ and $(t^v, t^b)$. We have that:
+
+$\Gamma^{\bullet}: R \vdash (t^v,t^b)$ if and only if $\Gamma: R \vdash (t^v, t^b)$.
 \end{lemme}
 
 \begin{proof}
-Dans le sens direct, l'opération de pointage fait apparaître de nouvelles règles mais n'en supprime ni n'en modifie aucune. Donc $A$ n'a pas été modifié, donc l'arbre de preuve utilisé pour obtenir que $\Gamma^{\bullet}: A\vdash t$ permet de prouver $\Gamma: A\vdash t$.
-
-On utilise le même argument dans l'autre sens.
+The pointing operation create new productions rules but doesn't modify any production rule already present nor the mapping on non terminal present before the pointing. In other words: $G \subset G^{\bullet}$ and $M \subset M^{\bullet}$. Moreover the proof tree for $\Gamma^{\bullet}: R \vdash (t^v,t^b)$ can't involve any pointed element because no inference rule allow that. Therefore $\Gamma^{\bullet}: R \vdash (t^v,t^b)$ and $\Gamma: R \vdash (t^v, t^b)$ have the same valid proof tree.
 \end{proof}
 
 \begin{proof}[Unpoint réalise bien une opération de dépointage]
