@@ -36,7 +36,6 @@ Builders use nested tuples as arguments, the first question is then to understan
 
 Some definitions elements:
 \begin{itemize}
-	\item RuleName present in the UsainBoltz library are called non terminal.
 	\item a python tuple is noted with a prefix Tp: (1, 2) becomes Tp(1, 2).
 	Mathematical couples are noted normally.
 \end{itemize}
@@ -161,7 +160,7 @@ $$\inference{A \rightarrow R \in G \quad \Gamma:R\vdash (t^v, t^b)}{\Gamma:A\vda
 
 The $b$ in $t^b$ stands for $builder$ because $t^b$ is obtained by applying builders on the tuple. The $v$ in $t^v$ stands for $vanilla$ because no tuples have been used on $t^v$.
 
-$t^v$ is called a left-hand acceptable tuple for $S$ and $t^b$ a right-hand acceptable tuple.
+$t^v$ is called a left-hand acceptable tuple for $S$ and $t^b$ a right-hand acceptable tuple. Sometimes, we will also say that $t^v$ is a left-hand acceptable tuple associated with $t^b$ for $S$ and $t^b$ is a a right-hand acceptable tuple associated with $t^v$ for $S$.
 \end{definition}
 
 We now define pointing.
@@ -215,31 +214,32 @@ $\Gamma^{\bullet}: R \vdash (t^v,t^b)$ if and only if $\Gamma: R \vdash (t^v, t^
 The pointing operation create new productions rules but doesn't modify any production rule already present nor the mapping on non terminal present before the pointing. In other words: $G \subset G^{\bullet}$ and $M \subset M^{\bullet}$. Moreover the proof tree for $\Gamma^{\bullet}: R \vdash (t^v,t^b)$ can't involve any pointed element because no inference rule allow that. Therefore $\Gamma^{\bullet}: R \vdash (t^v,t^b)$ and $\Gamma: R \vdash (t^v, t^b)$ have the same valid proof tree.
 \end{proof}
 
-\begin{proof}[Unpoint réalise bien une opération de dépointage]
+\begin{proof}[UnpointTp is an unpointing operation.]
 
-Cas de bases:
+Base cases:
 \begin{itemize}
 	\item
-$A = Epsilon()$ donc $A^{\bullet} = Zero()$, on ne peut pas avoir $Zero() \vdash t$ car $Zero()$ n'est pas associé à une règle d'inférence. D'un autre coté, $Unpoint(t, Epsilon())$ lève une exception (donc n'est pas correctement défini).
+$R = Epsilon()$ then $R^{\bullet} = Zero()$, there are no inference rules associated with $Zero()$, therefore there are no $(t^{v\bullet}, t^{b\bullet})$ acceptable for $^R$. On the other hand, $Unpoint(t^v, Epsilon())$ raises an exception.
 
 	\item
-$Marker()$ et $Zero()$ sont très similaires à $Epsilon()$.
+$Marker()$ and $Zero()$ are very similar to $Epsilon()$.
 
 	\item
-$A = Atom()$ donc $A^{\bullet} = Atom()$. On a donc $Unpoint(t,A) = t$. Si $\Gamma^{\bullet}: Atom() \vdash t$, alors on peut utiliser la seule règle d'inférence faisant intervenir l'atome pour en déduire que $t = Atom()$. Donc, en appliquant cette même règle d'inférence on en déduit que $G: Atom() \vdash t$. Le sens inverse est identique.
+$R = Atom()$ therefore $R^{\bullet} = Atom()$. Then $UnpointTp(t^{v\bullet},R) = t^{v\bullet}$ and $UnpointTp(t^{b\bullet}, R) = t^{b\bullet}$ . If $\Gamma^{\bullet}: Atom() \vdash (t^{v\bullet}, t^{b\bullet})$, then we can apply the lemma to directly obtain the direct implication. The inverse implication is identical.
 \end{itemize}
 
-Cas récursifs:
+Recursive cases, to avoid too much repetition, there is only a proof for union, sequences and rulenames:
 \begin{itemize}
 	\item
-$A = A_1 + ... + A_n$, alors $A^{\bullet} = A_1^{\bullet} + ... + A_n^{\bullet}$. On applique l'unique règle d'inférence associée à l'union, on en déduit que $t = (i,t')$ avec $1 \le i \le n$ et $\Gamma^{\bullet}: A_i^{\bullet} \vdash t'$. $A$ apparait dans $G$, donc $A_i$ apparait dans $G$, on peut donc utiliser notre induction. Par hypothèse d'induction, $\Gamma: A_i \vdash Unpoint(t', A_i)$ et donc, en appliquant la règle d'inférence pour l'union, $$\Gamma: A \vdash (i,Unpoint(t', A_i)) = Unpoint((i,t'), A) = Unpoint(t, A)$$. Le sens réciproque est identique.
+$R = R_1 + ... + R_n$, then $R^{\bullet} = R_1^{\bullet} + ... + R_n^{\bullet}$. The only inference rule for union gives that $t^{v\bullet} = (i,t'^{v\bullet})$, $t^{b\bullet} = (i,t'^{b\bullet})$ with $1 \le i \le n$ and $\Gamma^{\bullet}: R_i^{\bullet} \vdash (t'^{v\bullet}, t'^{b\bullet})$. $R$ appears in $G$, therefore $R_i$ appears in $G$. By hypothesis, $\Gamma: R_i \vdash (UnpointTp(t'^{v\bullet}, R_i), UnpointTp(t'^{b\bullet}, R_i))$ we conclude by applying the inference rule for union and simplifying the UnpointTp expression. The inverse implication is identical.
 
 	\item
-$A = A_1 \times ... \times A_n$, alors $A^{\bullet} = A_1^{\bullet}\times A_2 \times ... \times A_n + ... + A_1 \times ... \times A_{n-1} \times A_n^{\bullet}$. En appliquant la règle d'inférence pour l'union, on en déduit que $t = (i, t')$ avec $t' = (t_1, ..., t_n)$. Puisque $\Gamma^{\bullet}: A_1 \times ... \times A_i^{\bullet} \times ... \times A_n \vdash (t_1, ..., t_n)$, on peut cette fois ci appliquer la règle d'inférence pour le produit. Alors, pour $j\ne i$ $G^{\bullet}: A_j \vdash t_j$, or $A_j$ apparait dans $G$ car $A$ apparait dans $G$, donc on peut appliquer notre lemme pour obtenir que $G: A_j \vdash t_j$. Par hypothèse d'induction, on sait aussi que $\Gamma: A_i \vdash Unpoint(t_i, A_i)$, on peut utiliser l'inférence pour le produit pour en déduire que $$\Gamma: A_1 \times ... \times A_n \vdash (t_1, ..., Unpoint(t_i, A_i), ..., t_n) = Unpoint(t,A)$$ Le sens réciproque est identique.
+If $R = A$ is a rulename such that $A \rightarrow S \in G$, the corresponding inference rule is the simplification. Therefore there exists a right hand accpetable tuple $t^{'b\bullet}$ associated with $t^{v\bullet}$ for $S^{\bullet}$ such that $M^{\bullet}(A^{\bullet})(t'^{b\bullet}) = t^{b\bullet}$. We can apply the hypothesis of induction on $S$:
+$$\Gamma: S \vdash (Unpoint(t^{v\bullet}, S), Unpoint(t^{'b\bullet}, S))$$
 
-	\item
-Si $A$ est une classe auxiliaire, la seule règle appliquable est la simplifcation. Il existe donc un $t$ et une règle $R$ associée à A tel que $\Gamma^{\bullet}: A^{\bullet} \vdash B^\bullet(t)$ et $\Gamma^{\bullet}: R^{\bullet} \vdash t$. Par induction, $\Gamma: R\vdash Unpoint(t, R)$ et par simplification, $$\Gamma: A\vdash B(Unpoint(t, R)) = B^{\bullet}(t) = Unpoint(B^{\bullet}(t),A)$$
-Le sens invevrse est identique.
+$M(A)(Unpoint(t^{'b\bullet})) = M^{\bullet}(A^{\bullet})(t^{'b\bullet}) = t^{b\bullet} = Unpoint(t^{b\bullet}, A)$. By applying the inference rule for simplification, $$\Gamma: A\vdash (UnpointTp(t^{v\bullet}, A), M(A)(Unpoint(t^{'b\bullet}))) = (UnpointTp(t^{v\bullet}, A), UnpointTp(t^{b\bullet}, A))$$
+
+The inverse implication is identical.
 \end{itemize}
 
 \end{proof}
