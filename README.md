@@ -39,10 +39,16 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 	(Fait)
 
 - Trouver quelques exemples pour le pointage.
-(Trouver solution pour oracle et À mettre au propre)
+(Fait)
 
 - Tout relire.
 (Fait pour grammar.py)
 
 #---------------------------
 - Mise en place de MSET et cycle non étiqueté.
+
+
+#---------------------------
+- Rédaction du rapport de stage.
+
+(Entamé)
