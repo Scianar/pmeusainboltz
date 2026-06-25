@@ -50,5 +50,4 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 
 #---------------------------
 - Rédaction du rapport de stage.
-
 (Entamé)

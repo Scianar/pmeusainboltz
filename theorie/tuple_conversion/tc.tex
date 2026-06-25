@@ -64,7 +64,7 @@ $R = Union(Product(Atom(), Epsilon(), Epsilon()), Atom())$ is a sub-right-rule.
 \\
 $S_1 = Product(Atom(), Epsilon(), Epsilon())$ appears in $R$ because $Union(S_1, Atom()) = R$.
 \\
-$S_2 = Product(Atom(), Epsilon())$ doesn't appear in $R$ because $Product(Product(Atom(), Epsilon()), Epsilon()) \ne Product(Atom(), Epsilon(), Epsilon())$ (je sais pas comment finir ce cas).
+$S_2 = Product(Atom(), Epsilon())$ doesn't appear in $R$ because $Product(Product(Atom(,  Epsilon()), Epsilon()) \ne Product(Atom(), Epsilon(), Epsilon())$ (je sais pas comment finir ce cas).
 \end{example}
 
 From this definition we can define a grammar.
@@ -95,9 +95,9 @@ def Point(S: SubRightRule) -> SubRightRule:
 		case RuleName(name):
 			return RuleName(name + "_P")
 		case Set(R, leq = i, geq = j):
-			return Product(R, Set(Point(R), leq = i-1, geq = j-1))
+			return Product(Point(R), Set(R, leq = i-1, geq = j-1))
 		case Cycle(R, leq = i, geq = j):
-			return Product(R, Seq(Point(R), leq = i-1, geq = j-1))
+			return Product(Point(R), Seq(R, leq = i-1, geq = j-1))
 		case Seq(R, leq = None, geq = None):
 			return Union(Product(Seq(R, eq = 0), Point(R), Seq(R)))
 		case Seq(R, leq = i, geq = j):
@@ -116,25 +116,58 @@ def Point(S: SubRightRule) -> SubRightRule:
 				Product(Seq(R, geq = j-1), Point(R), Seq(R)))
 \end{lstlisting}
 
+\begin{definition}[Pointing]
+For any sub-right-rule $S$, S pointed noted $S^{\bullet}$ is $S^{\bullet} = Point(S)$.
+
+For a grammar $G = \{A_1\rightarrow R_1, ..., A_n\rightarrow R_n\}$, $G^{\bullet} = \{A_1\rightarrow R_1, ..., A_n\rightarrow R_n, A_1^{\bullet}\rightarrow R_1^{\bullet}, ..., A_n^{\bullet}\rightarrow R_n^{\bullet}\}$.
+
+\end{definition}
+
+\begin{example}[Functional graph]
+We define the grammar of functional graphs $G$:
+\begin{align*}
+G = &\{&\\
+&&S &\rightarrow& Set(Cycle(T))\\
+&&T &\rightarrow& z \times Set(T)\\
+&\}&
+\end{align*}
+
+Then the pointed grammar $G^{\bullet}$ is:
+\begin{align*}
+G^{\bullet} = &\{&\\
+&&S &\rightarrow& Set(Cycle(T))\\
+&&T &\rightarrow& z \times Set(T)\\
+&&S^{\bullet} &\rightarrow& T^{\bullet} \times Seq(T) \times Set(Cycle(T))\\
+&&T^{\bullet} &\rightarrow& z \times Set(T) + z \times T^{\bullet} \times Set(T)\\
+&\}&
+\end{align*}
+
+\end{example}
+
 Now we define the tuple unpointing algorithm.
 
 \begin{lstlisting}
-def UnpointTp(t: tuple, S: SubRightRule) -> tuple:
+#For now ignore the argument left.
+def UnpointTp(t: tuple, S: SubRightRule, left: bool) -> tuple:
 	switch S:
 		case Union(R1, ..., Rn):
 			Tp(i, tu) = t #This can raise an error if t has the wrong format.
-			return Tp(i, Unpoint(Ri, tu))
+			return Tp(i, Unpoint(Ri, tu, left))
 		case Product(R1, ..., Rn):
 			Tp(i, Tp(t1, ..., tn)) = t
-			return Tp(t1, ..., Unpoint(Ri, ti), ..., tn)
-		case RuleName(_):
-			return t
+			return Tp(t1, ..., Unpoint(Ri, ti, left), ..., tn)
+		case RuleName(A):
+			if left:
+				#if A is associated with the right rule R in the grammar,
+				return Unpoint(t, R, True)
+			else:
+				return t
 		case Cycle(R) | Set(R):
 			Tp(t1, Tp(t2, ..., tn))
-			return Tp(Unpoint(R, t1), t2, ..., tn)
+			return Tp(Unpoint(R, t1, left), t2, ..., tn)
 		case Seq(R):
 			Tp(_, Tp(Tp(t_left_1, ..., t_left_n), t_pointed, Tp(t_right_1, ..., t_right_m))) = t
-			return Tp(t_left_1, ..., t_left_n, Unpoint(R, t_mid), t_right_1, ..., t_right_m)
+			return Tp(t_left_1, ..., t_left_n, Unpoint(R, t_mid, left), t_right_1, ..., t_right_m)
 		case Epsilon() | Marker(_) | Zero():
 			raise Exception("Error")
 \end{lstlisting}
@@ -154,23 +187,24 @@ $$\inference{i \in [1; n] \quad \Gamma:S_i\vdash (t^v, t^b)}{\Gamma:S_1 + ... + 
 
 $$\inference{\Gamma:S_1\vdash (t^v_1, t^b_1)\quad ...\quad \Gamma:S_n \vdash (t^v_n, t^b_n)}{\Gamma:S_1 \times ... \times S_n\vdash (Tp(t^v_1,...,t^v_n), Tp(t^b_1, ..., t^b_n))}[Product]\;n\ge 2$$
 
-$$\inference{\Gamma:S \vdash (t^v_1, t^b_1)\quad ...\quad \Gamma:S \vdash (t^v_n, t^b_n)}{\Gamma:Seq(S) \vdash (Tp(t^v_1,...,t^v_n), Tp(t^b_1,...,t^b_n))}[Sequence]$$
+$$\inference{\Gamma:S \vdash (t^v_1, t^b_1)\quad ...\quad \Gamma:S \vdash (t^v_n, t^b_n)}{\Gamma:IterOP(S) \vdash (Tp(t^v_1,...,t^v_n), Tp(t^b_1,...,t^b_n))}[IterOp]\;IterOp \in \{Seq, Set, Cycle\}$$
 
 $$\inference{A \rightarrow R \in G \quad \Gamma:R\vdash (t^v, t^b)}{\Gamma:A\vdash (t^v, M(A)(t^b))}[Simplification]$$
 
-The $b$ in $t^b$ stands for $builder$ because $t^b$ is obtained by applying builders on the tuple. The $v$ in $t^v$ stands for $vanilla$ because no tuples have been used on $t^v$.
+The $b$ in $t^b$ stands for $builder$ because $t^b$ is obtained by applying builders on the tuple. The $v$ in $t^v$ stands for $vanilla$ because no builders have been used on $t^v$.
 
 $t^v$ is called a left-hand acceptable tuple for $S$ and $t^b$ a right-hand acceptable tuple. Sometimes, we will also say that $t^v$ is a left-hand acceptable tuple associated with $t^b$ for $S$ and $t^b$ is a a right-hand acceptable tuple associated with $t^v$ for $S$.
 \end{definition}
 
 We now define pointing.
-\begin{definition}[Pointing]
-For any sub-right-rule $S$, S pointed noted $S^{\bullet}$ is $S^{\bullet} = Point(S)$.
-
-For a grammar $G = \{A_1\rightarrow R_1, ..., A_n\rightarrow R_n\}$, $G^{\bullet} = \{A_1\rightarrow R_1, ..., A_n\rightarrow R_n, A_1^{\bullet}\rightarrow R_1^{\bullet}, ..., A_n^{\bullet}\rightarrow R_n^{\bullet}\}$.
-
-For a context $\Gamma = (G, M)$, $\Gamma^{\bullet} = (G^{\bullet}, M^{\bullet})$. For $A \rightarrow R \in G$, $M^{\bullet}(A) = M(A)$ and $M^{\bullet}(A^{\bullet})(t^{b\bullet}) = M(A)(Unpoint(t^{b\bullet}, R))$ where $t^{b\bullet}$ is a right acceptable tuple for $R^{\bullet}$. As it will be seen later, $M(A)(Unpoint(t^{b\bullet}, R))$ is correctly defined.
+\begin{definition}[Context pointing]
+For a context $\Gamma = (G, M)$, the pointed context $\Gamma^{\bullet}$ is $\Gamma^{\bullet} = (G^{\bullet}, M^{\bullet})$. For $A \rightarrow R \in G$, $M^{\bullet}(A) = M(A)$ and $M^{\bullet}(A^{\bullet})(t^{b\bullet}) = M(A)(Unpoint(t^{b\bullet}, R))$ where $t^{b\bullet}$ is a right acceptable tuple for $R^{\bullet}$. As it will be seen later, $M(A)(Unpoint(t^{b\bullet}, R))$ is correctly defined.
 \end{definition}
+
+The unpointing algorithm is different for left-hand and right-hand tuples. Indeed the left-hand $t^v$ corresponds to our intuitive vision of a combinatorial structure represented by a tuple, $UnpointTp(t^v, A, True)$ convert the entire tuple into an unpoinited tuple. On the other hand, the right-hand $t^b$ is closer to what is really implemented, the builders functions create entirely new objects. Those builders are called repeatedly and unpointing the entire tuple directly is not possible, instead we need to unpoint each time we call a builder function.
+
+\begin{example}[Binary trees]
+\end{example}
 
 Finally we define the size of a left-hand tuple: $|t^v|_z$
 \begin{align*}
@@ -234,7 +268,7 @@ Recursive cases, to avoid too much repetition, there is only a proof for union, 
 $R = R_1 + ... + R_n$, then $R^{\bullet} = R_1^{\bullet} + ... + R_n^{\bullet}$. The only inference rule for union gives that $t^{v\bullet} = (i,t'^{v\bullet})$, $t^{b\bullet} = (i,t'^{b\bullet})$ with $1 \le i \le n$ and $\Gamma^{\bullet}: R_i^{\bullet} \vdash (t'^{v\bullet}, t'^{b\bullet})$. $R$ appears in $G$, therefore $R_i$ appears in $G$. By hypothesis, $\Gamma: R_i \vdash (UnpointTp(t'^{v\bullet}, R_i), UnpointTp(t'^{b\bullet}, R_i))$ we conclude by applying the inference rule for union and simplifying the UnpointTp expression. The inverse implication is identical.
 
 	\item
-If $R = A$ is a rulename such that $A \rightarrow S \in G$, the corresponding inference rule is the simplification. Therefore there exists a right hand accpetable tuple $t^{'b\bullet}$ associated with $t^{v\bullet}$ for $S^{\bullet}$ such that $M^{\bullet}(A^{\bullet})(t'^{b\bullet}) = t^{b\bullet}$. We can apply the hypothesis of induction on $S$:
+If $R = A$ is a rulename such that $A \rightarrow S \in G$, the corresponding inference rule is the simplification. Therefore there exists a right hand acceptable tuple $t^{'b\bullet}$ associated with $t^{v\bullet}$ for $S^{\bullet}$ such that $M^{\bullet}(A^{\bullet})(t'^{b\bullet}) = t^{b\bullet}$. We can apply the hypothesis of induction on $S$:
 $$\Gamma: S \vdash (Unpoint(t^{v\bullet}, S), Unpoint(t^{'b\bullet}, S))$$
 
 $M(A)(Unpoint(t^{'b\bullet})) = M^{\bullet}(A^{\bullet})(t^{'b\bullet}) = t^{b\bullet} = Unpoint(t^{b\bullet}, A)$. By applying the inference rule for simplification, $$\Gamma: A\vdash (UnpointTp(t^{v\bullet}, A), M(A)(Unpoint(t^{'b\bullet}))) = (UnpointTp(t^{v\bullet}, A), UnpointTp(t^{b\bullet}, A))$$
@@ -244,8 +278,8 @@ The inverse implication is identical.
 
 \end{proof}
 
-\begin{proof}[Unpoint respecte la taille des tuples]
-Cas de bases:
+\begin{proof}[Unpoint respects the size of tuples]
+Basic cases:
 \begin{itemize}
 	\item
 $A = Epsilon()$, comme expliqué plus haut, ce cas ne peut pas se produire.
