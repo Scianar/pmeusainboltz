@@ -2,6 +2,7 @@
 \usepackage{amsmath}
 \usepackage{semantic}
 \usepackage{listings}
+\usepackage[a4paper, total={7in, 8in}]{geometry}
 \newtheorem{theorem}{Theorem}
 \newtheorem{example}{Example}
 \newtheorem{proof}{Proof}
@@ -128,7 +129,7 @@ We define the grammar of functional graphs $G$:
 \begin{align*}
 G = &\{&\\
 &&S &\rightarrow& Set(Cycle(T))\\
-&&T &\rightarrow& z \times Set(T)\\
+&&T &\rightarrow& Atom() \times Set(T)\\
 &\}&
 \end{align*}
 
@@ -136,9 +137,9 @@ Then the pointed grammar $G^{\bullet}$ is:
 \begin{align*}
 G^{\bullet} = &\{&\\
 &&S &\rightarrow& Set(Cycle(T))\\
-&&T &\rightarrow& z \times Set(T)\\
+&&T &\rightarrow& Atom() \times Set(T)\\
 &&S^{\bullet} &\rightarrow& T^{\bullet} \times Seq(T) \times Set(Cycle(T))\\
-&&T^{\bullet} &\rightarrow& z \times Set(T) + z \times T^{\bullet} \times Set(T)\\
+&&T^{\bullet} &\rightarrow& Atom() \times Set(T) + Atom() \times T^{\bullet} \times Set(T)\\
 &\}&
 \end{align*}
 
@@ -147,27 +148,26 @@ G^{\bullet} = &\{&\\
 Now we define the tuple unpointing algorithm.
 
 \begin{lstlisting}
-#For now ignore the argument left.
-def UnpointTp(t: tuple, S: SubRightRule, left: bool) -> tuple:
+def UnpointTp(t: tuple, S: SubRightRule, stop_at_rulename: bool) -> tuple:
 	switch S:
 		case Union(R1, ..., Rn):
 			Tp(i, tu) = t #This can raise an error if t has the wrong format.
-			return Tp(i, Unpoint(Ri, tu, left))
+			return Tp(i, Unpoint(Ri, tu, stop_at_rulename))
 		case Product(R1, ..., Rn):
 			Tp(i, Tp(t1, ..., tn)) = t
-			return Tp(t1, ..., Unpoint(Ri, ti, left), ..., tn)
+			return Tp(t1, ..., Unpoint(Ri, ti, stop_at_rulename), ..., tn)
 		case RuleName(A):
-			if left:
+			if stop_at_rulename:
 				#if A is associated with the right rule R in the grammar,
 				return Unpoint(t, R, True)
 			else:
 				return t
 		case Cycle(R) | Set(R):
 			Tp(t1, Tp(t2, ..., tn))
-			return Tp(Unpoint(R, t1, left), t2, ..., tn)
+			return Tp(Unpoint(R, t1, stop_at_rulename), t2, ..., tn)
 		case Seq(R):
 			Tp(_, Tp(Tp(t_left_1, ..., t_left_n), t_pointed, Tp(t_right_1, ..., t_right_m))) = t
-			return Tp(t_left_1, ..., t_left_n, Unpoint(R, t_mid, left), t_right_1, ..., t_right_m)
+			return Tp(t_left_1, ..., t_left_n, Unpoint(R, t_mid, stop_at_rulename), t_right_1, ..., t_right_m)
 		case Epsilon() | Marker(_) | Zero():
 			raise Exception("Error")
 \end{lstlisting}
@@ -201,9 +201,43 @@ We now define pointing.
 For a context $\Gamma = (G, M)$, the pointed context $\Gamma^{\bullet}$ is $\Gamma^{\bullet} = (G^{\bullet}, M^{\bullet})$. For $A \rightarrow R \in G$, $M^{\bullet}(A) = M(A)$ and $M^{\bullet}(A^{\bullet})(t^{b\bullet}) = M(A)(Unpoint(t^{b\bullet}, R))$ where $t^{b\bullet}$ is a right acceptable tuple for $R^{\bullet}$. As it will be seen later, $M(A)(Unpoint(t^{b\bullet}, R))$ is correctly defined.
 \end{definition}
 
-The unpointing algorithm is different for left-hand and right-hand tuples. Indeed the left-hand $t^v$ corresponds to our intuitive vision of a combinatorial structure represented by a tuple, $UnpointTp(t^v, A, True)$ convert the entire tuple into an unpoinited tuple. On the other hand, the right-hand $t^b$ is closer to what is really implemented, the builders functions create entirely new objects. Those builders are called repeatedly and unpointing the entire tuple directly is not possible, instead we need to unpoint each time we call a builder function.
+The unpointing algorithm is different for left-hand and right-hand tuples. Indeed the left-hand $t^v$ corresponds to our intuitive vision of a combinatorial structure represented by a tuple, $UnpointTp(t^v, A, True)$ convert the entire tuple into an unpoinited tuple. On the other hand, the right-hand $t^b$ is closer to what is really implemented, the builders functions create entirely new objects. Those builders are called repeatedly and unpointing the entire tuple directly is not possible, instead we need to unpoint each time we call a builder function. That's why we stop unpointing at rulenames.
 
 \begin{example}[Binary trees]
+We consider the following grammar for rooted binary trees:
+\begin{align*}
+G = &\{&\\
+&&T &\rightarrow& Atom() + Atom() \times T \times T\\
+&\}&
+\end{align*}
+
+We also need a builder for $T$, the height of the tree should be enough:
+\begin{lstlisting}
+def height(tp):
+	(i, content) #this is an union.
+	if i == 0: #a leaf
+		return 0
+	(_, left_height, right_height) = content
+	return max(left_height, right_height) + 1
+\end{lstlisting}
+
+We then have the context $\Gamma = \{G, \{T: height\}\}$. 
+
+We write $Z = Atom()$.
+
+We can consider the tree $t^v = (\text{0}, ((\text{0}, Z), (\text{0}, Z)))$ of height $t^b = 1$. We want to prove that $(t^v, t^b)$ is acceptable for $T$. We first demonstrate the leaf rule:
+$$\inference{}{\Gamma: T\vdash ((\text{0}, Z), 0)}[Leaf]$$
+which can be obtained by the following proof
+$$\inference{\inference{\inference{}{\Gamma :Z\vdash (Z, Z)}[Atom]}{\Gamma: Z + Z \times T \times T \vdash ((\text{0}, Z), (\text{0}, Z))}[Union]}{\Gamma: T \vdash ((\text{0}, Z), 0)}[Simp.]$$
+Now the main proof:
+$$\inference{\inference{\inference{\inference{}{
+\Gamma :Z\vdash (Z, Z)}[Atom] \quad
+\inference{}{\Gamma: T\vdash ((\text{0}, Z), 0)}[Leaf] \quad
+\inference{}{\Gamma: T\vdash ((\text{0}, Z), 0)}[Leaf]}
+{\Gamma: Z\times T \times T\vdash (((\text{0}, Z), (\text{0} ,Z)), (Z, 0, 0))}[Product]}{\Gamma: Z + Z \times T \times T\vdash (t^v, (\text{1}, (Z, 0, 0)))}[Union]}{\Gamma: T \vdash (t^v, 1)}[Simp.]$$
+
+For integer which represent the element of an union, we write 0, 1, 2, etc... whereas for heights, we write $0$, $1$, $2$, etc...
+
 \end{example}
 
 Finally we define the size of a left-hand tuple: $|t^v|_z$
@@ -217,7 +251,7 @@ Finally we define the size of a left-hand tuple: $|t^v|_z$
 
 The theory to prove the three following theorems has now been established.
 \begin{theorem}[UnpointTp is an unpointing operation.]
-Let $\Gamma = (G, M)$ be a context, $R$ a sub-right-rule appearing in $G$ and $t^v, t^b$ tuples.
+Let $\Gamma = (G, M)$ be a context, $R$ a sub-right-rule appearing in $G$ and $t^{v\bullet}, t^{b\bullet}$ tuples.
  
  $\Gamma^{\bullet}:R^{\bullet} \vdash (t^{v\bullet}, t^{b\bullet})$ if and only if $Unpoint(t^{v\bullet}, R)$ is correctly defined, $Unpoint(t^{b\bullet}, R)$ is correctly defined and $\Gamma:R \vdash (UnpointTp(t^{v\bullet}, R), UnpointTp(t^{b\bullet}, R))$.
 \end{theorem}
@@ -231,7 +265,7 @@ Let $\Gamma = (G, M)$ be a context, $R$ a sub-right-rule appearing in $G$ and $t
 \end{theorem}
 
 \begin{theorem}[For $n$ tuples pointed of size $n$ there is one non pointed tuple]
-Let $\Gamma = (G, M)$ be a context, $R$ a sub-right-rule appearing in $G$ and $t^v, t^b$ tuples such that $\Gamma: R \vdash (t^v, t^b)$. Then $\{t^{v\bullet} | UnpointTp(t^{v\bullet}, R) = t^v \text{ and $t^v$ is left-hand acceptable for $R^{\bullet}$}\} = |t^v|_z$.
+Let $\Gamma = (G, M)$ be a context, $R$ a sub-right-rule appearing in $G$ and $t^v, t^b$ tuples such that $\Gamma: R \vdash (t^v, t^b)$. Then $|\{t^{v\bullet} | UnpointTp(t^{v\bullet}, R) = t^v \text{ and $t^v$ is left-hand acceptable for $R^{\bullet}$}\}| = |t^v|_z$.
 \end{theorem}
 
 All three theorems will be proven by an induction on sub-right-rules.
