@@ -45,15 +45,16 @@ The internship was with Martin Pépin and Matthieu Dien as internship supervisor
 Before explaining what I did during the internship, the basic of combinatorial theory and usainboltz must be established.
 
 \subsection{Combinatorial theory}
-\begin{definition}
+\begin{definition}[Combinatorial class]
 A class of combinatorial structures is a pair $\mathcal{C} = \langle \text{\rsfs C}, |.|_{\mathcal{C}}\rangle$, where {\rsfs C} is a finite or denumerable set and $|.|_{\mathcal{C}}$ is an application from {\rsfs C} to $\mathbb{N}$.
 
 For $c\in \text{\rsfs C}$, $|c|_{\mathcal{C}}$ is the size of $c$. There must always be a finite number of elements of each size in {\rsfs C}.
 
 The counting sequence $(C_n)_{n\in \mathbb{N}}$ associated with {\rsfs C} is the number of elements of each size in {\rsfs C}. I.e. $\forall n\in \mathbb{N}, C_n = |\{c \in \text{\rsfs C} | |c|_{\mathcal{C}} = n\}|$.
+
+All combinatorial class are labelled or unlabelled, we will see further in the paper what that means.
 \end{definition}
 
-Later on, we will indistinctively use {\rsfs C} or $\langle \text{\rsfs C}, |.|\rangle$. We will sometimes simplify the notation for the size: $|.|$. When different class of combinatorial structures will be involved context can be used to differentiate their different size functions.
 Later on, we will indistinctively use {\rsfs C} or $\langle \text{\rsfs C}, |.|\rangle$. We will sometimes simplify the notation for the size: $|.|$. When different class of combinatorial structures will be involved context can be used to differentiate their different size functions.
 
 \begin{definition}[Isomorphism]
@@ -85,6 +86,8 @@ This definition can be extended to the union of a finite or denumerable number o
 The sequence construction noted $\text{\rsfs C} = Seq(\text{\rsfs A})$ is defined as $\text{\rsfs C} = \text{\rsfs E} + \text{\rsfs A} + \text{\rsfs A} \times \text{\rsfs A} + \text{\rsfs A} \times \text{\rsfs A} \times \text{\rsfs A} + ...$. To ensure that {\rsfs C} is properly defined, {\rsfs A} must not contain any element of size zero. Otherwise, there would be an infinite number of elements of same size.    
 \end{definition}
 
+The two following constructions are only allowed in the labelled case.
+
 \begin{definition}[Labelled Set]
 The set construction noted $\text{\rsfs C} = Set(\text{\rsfs A})$ is the class of sets elements of {\rsfs A}. It can be seen as the quotient set of $Seq(\text{\rsfs A})$ by the relation $A = (A_1, ..., A_n) \sim B = (B_1, ..., B_n)\text{ if and only if $B$ is a permuation of $A$}$.    
 \end{definition}
@@ -103,45 +106,100 @@ A specification of a class of combinatorial structures {\rsfs C} is a set of (po
 {\rsfs C} is said to be specifiable if it admits a specification of finite size.
 \end{definition}
 
-This definition means that for any specifiable class {\rsfs C}, an element $c \in \text{\rsfs C}$ is composed of $n$ atoms. Due to aboves definitions, each of these atoms is distinct from the other.
+This definition means that for any specifiable class {\rsfs C}, an element $c \in \text{\rsfs C}$ is composed of $n$ atoms. Due to aboves definitions, each of these atoms is distinct from the other. 
 
 An alternate definition for sequences is by giving it a specification: $\text{\rsfs C} = Seq(\text{\rsfs A})$ is equivalent to {\rsfs C} is solution of $\text{\rsfs C} = \text{\rsfs E} + \text{\rsfs A} \times \text{\rsfs C}$. Then the specification of {\rsfs C} would be this equation joined with the specification of {\rsfs A}.
 
+We can now explain what is a labelled and an unlabelled class.
+\begin{definition}[Labelled and Unlabelled class]
+A labelled class {\rsfs C} is a class where for each element $C$ of {\rsfs C}, the atoms of $C$ have been distinguished by attributing a distrinct number from $1$ to $|C|$. This is a proper definition due to the fact that each atom is distinct.
 
+In the case where such a mapping is not provided, we consider {\rsfs C} to be an unlabelled class.
+\end{definition}
+
+For more basic construction, labelled and unlabelled structures are very similar. When building more complex class, unlabelled class are harder to deal with. That's why unlabelled cycles (UCycle) and sets (PSet, MSet) have been ommited for now.
 
 Now that we have combinatorial class and the capacity to build them, we can define an important tool to study them.
 \begin{definition}[ordinary and exponential generating functions]
-Let {\rsfs C} be an unlabelled combinatorial class, and $(C_n)$ its counting sequence. The Ordinary Generating Function (OGF) of {\rsfs C} is $C(z) = \displaystyle\sum_{n\in \mathbb{N}} z^nC_n$.
+Let {\rsfs C} be an unlabelled combinatorial class, and $(C_n)$ its counting sequence. The Ordinary Generating Function $(OGF)$ of {\rsfs C} is $C(z) = \displaystyle\sum_{n\in \mathbb{N}} z^nC_n$.
 
-Let {\rsfs C} be a labelled combinatorial class, and $(C_n)$ its counting sequence. The Exponential Generating Function (EGF) of {\rsfs C} is $C(z) = \displaystyle\sum_{n\in \mathbb{N}} \frac{z^nC_n}{n!}$.
+Let {\rsfs C} be a labelled combinatorial class, and $(C_n)$ its counting sequence. The Exponential Generating Function $(EGF)$ of {\rsfs C} is $C(z) = \displaystyle\sum_{n\in \mathbb{N}} \frac{z^nC_n}{n!}$.
 
 In both cases, we denote by $\rho_C$ its radius of convergence.
 \end{definition}
 A notation often used to obtain $C_n$ from $C$ is $[z^n]C(z) = C_n$.
 
-The letter used for a combinatorial class will always be the same one used for its corresponding generating function.
+The letter used for a combinatorial class will always be the same one used for its corresponding generating function. $OGF$ will always be used for unlabelled structures and $EGF$ for labelled structures.
 
 Finally, we will often alternate between seeing $C$ as a formal series or a power series. Context can be used to differentiate the two.
 
-\begin{property}[product, union and sequence on OGF] \label{pusOGF}
+\begin{property}[product, union and sequence on $OGF$ and $EGF$] \label{pusOGFEGF}
 Let {\rsfs A} and {\rsfs B} be two combinatorial class (labelled or unlabelled).
 
 \begin{itemize}
-\item If $\text{\rsfs C} = \text{\rsfs A} \times \text{\rsfs B}$ then $C(z) = A(z)B(z)$.
+	\item If $\text{\rsfs C} = \text{\rsfs A} \times \text{\rsfs B}$ then $C(z) = A(z)B(z)$.
 
-\item If $\text{\rsfs C} = \text{\rsfs A} + \text{\rsfs B}$ then $C(z) = A(z) + B(z)$.
+	\item If $\text{\rsfs C} = \text{\rsfs A} + \text{\rsfs B}$ then $C(z) = A(z) + B(z)$.
 
-\item If $A$ has no objects of size $0$ and $\text{\rsfs C} = Seq(\text{\rsfs A})$, then $C(z) = \frac{1}{1-A(z)}$.
+	\item If $A$ has no objects of size $0$ and $\text{\rsfs C} = Seq(\text{\rsfs A})$, then $C(z) = \frac{1}{1-A(z)}$.
 
-\item If $A$ has no objects of size $0$ and $\text{\rsfs C} = Set(\text{\rsfs A})$, then $C(z) = \exp(A(z))$.
+	\item If $A$ has no objects of size $0$ and $\text{\rsfs C} = Set(\text{\rsfs A})$ (always in the label case), then $C(z) = \exp(A(z))$.
 
-\item If $A$ has no objects of size $0$ and $\text{\rsfs C} = Cyc(\text{\rsfs A})$, then $C(z) = \ln(\frac{1}{1-A(z)})$.
+ 	\item If $A$ has no objects of size $0$ and $\text{\rsfs C} = Cyc(\text{\rsfs A})$ (always in the label case), then $C(z) = \ln(\frac{1}{1-A(z)})$.
+\end{itemize}
+
+For the epsilon and atom class, $EGF$ and $OGF$ functions are identical:
+\begin{itemize}
+	\item $E(z) = 1$ (the epsilon class)
+	\item $Z(z) = z$ (the atom class)
 \end{itemize}
 \end{property}
 
+It is important to note that there is no difference dealing with labelled and unlabelled generatings functions for now.
+
+We can now talk about the Boltzmann model properly.
+\begin{definition}[Boltzmann model]
+Let {\rsfs C} a combinatorial class, $C$ its generating function and $x \in ]0,\rho_C[$.
+
+The boltzmann model of parameter $x$ over {\rsfs C} assign to each $\gamma \in \text{\rsfs C}$ the probability:
+$$\mathbb{P}_{x,\text{\rsfs C}}(\gamma) = \frac{x^{\gamma}}{C(x)} \text{   (unlabelled case)}$$
+$$\mathbb{P}_{x,\text{\rsfs C}}(\gamma) = \frac{x^{\gamma}}{C(x)|\gamma|!} \text{   (labelled case)}$$
+$\mathbb{P}_{x,\text{\rsfs C}}$ can sometimes be written $\mathbb{P}_{x}$.
+\end{definition}
+Despite the probability distribution of labelled and unlabelled generating functions being different, the associated samplers are almost identical.
 
 
-\subsection{The library Usainboltz (UNiform SAmplINg with BOLTZmann)}
+\begin{definition}[Boltzmann Samplers]
+A boltzmann sampler $\Gamma C$ for a class {\rsfs C} is an algorithm that produces objects from {\rsfs C} with respect to $\mathbb{P}_x$.
+
+Then, we note $\Gamma C(x) \in \text{\rsfs C}$, an output of this algorithm. 
+\end{definition}
+
+This paper will now focus on the boltzmann sampler introduced in \cite{BS}.
+\\\\
+Let {\rsfs C} a specifiable combinatorial class, we now define the Boltzmann Sampler $\Gamma C(x)$ by induction on the specification of {\rsfs C}.
+
+\begin{itemize}
+\item If {\rsfs C} is finite, then this is just taking a random element from $C$ according to a finite distribution which we assume can easily be done.
+
+\item If $\text{\rsfs C} = \text{\rsfs A} + \text{\rsfs B}$. We define $p = \frac{A(x)}{A(x) + B(x)} = \frac{A(x)}{C(x)}$. The probability that an element $\gamma \in \text{\rsfs  C}$ is an element of $A$ is $\mathbb{P}(\gamma \in \text{\rsfs A}) = p$. Therefore, $\Gamma C(x)$ is $\Gamma A(x)$ with probability $p$ and $\Gamma B(x)$ with probability $1-p$.
+
+\item If $\text{\rsfs C} = \text{\rsfs A} \times \text{\rsfs B}$. Then we observe that $\mathbb{P}_{x,\text{\rsfs C}} = (\mathbb{P}_{x,\text{\rsfs A}},\mathbb{P}_{x,\text{\rsfs B}})$. Therefore $\Gamma C(x)$ is $(\Gamma A(x),\Gamma B(x))$.
+
+\item If $\text{\rsfs C} = Seq(\text{\rsfs A})$. We can again rewrite this equality as: $\text{\rsfs C} = \{\epsilon\} + \text{\rsfs A} \times \text{\rsfs C}$ and use the sampler for product and unions.
+
+\item If $\text{\rsfs C} = Set(\text{\rsfs A})$ then the number of elements of {\rsfs A} in the set follow a Poisson law of parameter $A(x)$. Due to the labelling in {\rsfs C}, we are guaranted to not have two equals elements in a set, therefore our algorithm for $\Gamma C(x)$ is: take $k$ a random value sampled from the poisson law of parameter $A(x)$, make $k$ independant calls to $\Gamma A(x)$, return the resulting set.
+
+\item If $\text{\rsfs C} = Cycle(\text{\rsfs A})$ like for the set, we need to identify a law for the number of elements in the cycle. Let $K$ a random variable which follow the law $\mathbb P(K = k) = -\frac{{A(x)}^k}{log(1-A(x))k}$. Then, we have a very similar algorithm to the set: take $k$ a random value sampled according to $X$, make $k$ independant calls to $\Gamma A(x)$, return the resulting cycle.
+\end{itemize}
+
+In each case, when we consider labelled case, the algorithm also attributes labels properly which we assume can be done easily.
+
+The proof for the correctness of those samplers is done in \cite{BS}. 
+
+\subsection{The library Usainboltz (Uniform SAmplINg with BOLTZmann)}
+
+
 \section{Pointing}
 \subsection{Grammar pointing}
 \begin{lstlisting}

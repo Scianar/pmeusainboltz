@@ -51,3 +51,5 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 #---------------------------
 - Rédaction du rapport de stage.
 (Entamé)
+
+- Changer la définition de labelled et unlabelled, la mettre dès le début.
