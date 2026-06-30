@@ -1,5 +1,11 @@
 \begin{thebibliography}{1}
 
+\bibitem{MEMO}
+Vannereux A.
+\newblock Pointing method in boltzmann sampler (dans le dossier du fichier tex,
+  c'est mon mémo, vive les lapins!).
+\newblock 2026.
+
 \bibitem{BS}
 Flajolet P., Duchon P., Louchard G., and Schaeffer G.
 \newblock Boltzmann samplers for the random generation of combinatorial

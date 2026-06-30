@@ -197,10 +197,102 @@ In each case, when we consider labelled case, the algorithm also attributes labe
 
 The proof for the correctness of those samplers is done in \cite{BS}. 
 
+\begin{property}[Sampler complexity]
+Given an oracle computing values of all OGF present in the specification of {\rsfs C} in $O(1)$ the sampler is linear in the size of its output in terms of number of basic real-arithmetic operations $(+,-,\times,\div)$.
+\end{property}
+
+The proof has be partially done in \cite{BS} and in \cite{MEMO}
+
+From this we deduce a rejection sampler.
+
+\begin{definition}(Rejection Sampler)
+For {\rsfs C} a combinatorial class, $n \in \mathbb{N}$,and $\epsilon > 0$ we define the rejection sampler $\mu C(n,\epsilon)$:
+
+ Choose $x \in ]0,\rho_C[$, sample $\gamma \in \text{\rsfs C}$ according to $\mathbb{P}_x$, repeat until $|\gamma| \in [n(1-\epsilon),n(1+\epsilon)]$. Return $\gamma$.
+\end{definition}
+
+This sampler relies heavily on the distribution probability on sizes, therefore we need to study the associated random variable $N = |\gamma|$.
+
+\begin{property}[probability of $N$ and some notations.]
+The probability distribution on $N$ is as follows: $\forall n\in \mathbb{N}, \mathbb{P}_x(N = n) = \frac{C_nx^n}{C(x)}$.
+
+From this, we can easily deduce the expected value, the second moment and standard deviation:
+\begin{itemize}
+\item $v_1(x) = \mathbb{E}_x(N) = \frac{xC'(x)}{C(x)}$.
+
+\item $v_2(x) = \mathbb{E}_x(N^2) = \frac{x^2C''(x)+xC'(x)}{C(x)}$.
+
+\item $\sigma(x) = \sqrt{v_2(x)-{v_1(x)}^2}$.
+\end{itemize}
+\end{property}
+
+\begin{proof}
+Immediate due to the definition of $\mathbb{P}_x$.
+\end{proof}
+
+The formula for the first and second moment are of particular importance. The first determines a certain target size and the second control the Bolztmann Sampler range.
+
+Is is also important to note that $\mathbb{E}_x[N]$ is a strictly increasing function of $x$ as long as {\rsfs C} contains at least two elements of different sizes. Indeed, $$\mathbb{E}_x[N]' = \frac{\sigma^2(x)}{x}$$ and the standard deviation ($\sigma(x)$ here) is always strictly positive when the associated random variable can take different values.
+
+Therefore, it is possible in many situation to find for any $n\in \mathbb{N}$ a unique value $x$ such that $\mathbb{E}_x[N] = n$.
+
 \subsection{The library Usainboltz (Uniform SAmplINg with BOLTZmann)}
+The library Usainboltz created in 2019 implements the Boltzmann method in a broad set of cases. This library is coded in python, cython and c++ and has three main modules:
+\begin{itemize}
+	\item The module grammar implements tools to create and manipulate specifications.
+	\item The module oracle evaluates generating functions and tune a value $x$ (i.e. find a solution to $\mathbb{E}_x[N] = n$).
+	\item The module generator allows when provided with a grammar and an optional oracle (if not provided, the generator will create its own oracle) to sample elements from the combinatorial class associated with the grammar.
+\end{itemize} 
+
+When sampling, the generator doesn't build the structure from the root to the leaves, instead it calls builders functions provided by the user each time an auxiliary class is reached.
+
+\begin{example}[The height of a binary tree]
+To better understand how the usainboltz library works, we provide the simple example of a generator sampling the height of a binary tree.
+\begin{lstlisting}
+from usainboltz import *
+
+e, z = Epsilon(), Atom()
+T = RuleName("T")#rulenames correspond to auxiliary class in a grammar.
+
+G = Grammar({T: e + z*T*T}) #Creates the grammar for binary trees.
+gen = Generator(T) #Creates the associated generator, the oracle could be provided
+#by writing: Generator(T, oracle = oracle)
+
+def height_leaf(_):
+	return 0
+
+def height_node(tp: tuple):
+	#the builder has been called on the left and right child
+	#of the node, the first argument corresponds to the atom z.
+	(_, left, right) = tp
+	return max(left, right) + 1
+
+gen.set_builder(T, union_builder(height_leaf, height_node))
+#The builder needed for T receive as argument a special tuple which correspond to the union.
+#To hide this aspect, usainboltz provides a function to obtain builders for unions,
+#when the element on the left is chosen (e in this context), height_leaf is called
+#otherwise height_node is called.
+
+res = gen.sample((10, 20))
+#Finally, we sample a binary tree containing between 10 and 20 nodes, the result, is an
+#integer corresponding to the height of the sample tree.
+\end{lstlisting}
+\end{example}
 
 
-\section{Pointing}
+
+\section{Vector pointing}
+
+My task for this internship was to implement the pointing method in the Usainboltz library.
+
+\subsection{Pointing in combinatorial theory}
+As explained above, when a class has a specification, we have the guarantee that each element of size $n$ has exactly $n$ atoms, from this we can deduce a new operator on class:
+
+\begin{definition}[Pointing]
+Let {\rsfs C} be a specifiable combinatorial class
+\end{definition}
+
+
 \subsection{Grammar pointing}
 \begin{lstlisting}
 #Some shortcuts are allowed: None-1 = None; (i-j) = max(0, i-j). Very useful for sizes constraints.
