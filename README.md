@@ -31,25 +31,15 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 (Git sur gitlab)
 #----------------------------------------------------------- Phase close.
 
-#----------------------------------------------------------- Mise au propre de ce qui a été fait.
 
 - Finir la formalisation.
-(Entamé, dernière preuve à construire, peut-être complété autres preuves et rajouté règles d'inférences)
-	- Rajout du pointage de contexte.
-	(Fait)
+(Entamé, dernière preuve à construire, peut-être complété autres preuves, peut-être rajouter un exemple)
 
-- Trouver quelques exemples pour le pointage.
-(Fait)
+- Rajout de MSET, PSET, UCYCLE
+(probleme pour PSET, MSET fait par Martin, UCYCLE à moitié testé)
 
-- Tout relire.
-(Fait pour grammar.py)
+- Mise en place de MSET et cycle non étiqueté pour la grammaire.
+(fait pour la grammaire et insertion de la grammaire dans le générateur)
 
-#---------------------------
-- Mise en place de MSET et cycle non étiqueté.
-
-
-#---------------------------
 - Rédaction du rapport de stage.
-(Entamé)
-
-- Changer la définition de labelled et unlabelled, la mettre dès le début.
+(Entamé, 9 pages, un peu brouillon changer la definition de labelled et unlabelled pour le début, besoin d'exemples).

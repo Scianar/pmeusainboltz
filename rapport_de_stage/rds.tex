@@ -68,6 +68,11 @@ The epsilon class $\epsilon = \langle\text{\rsfs E},|.|_{\epsilon}\rangle$ is th
 Very similar, the atom class is comprised of exactly one element of size one: $\mathcal{Z} = \langle \{z\}, |.|_{\mathcal{Z}} \rangle$ with $|z|_{\mathcal{Z}} = 1$.
 \end{definition}
 
+We also introduce the zero class:
+\begin{definition}[Zero]
+The zero class is the class containing no elements.
+\end{definition}
+
 We now define a number of operations on those objects:
 
 \begin{definition}[Product]
@@ -296,6 +301,8 @@ This operator corresponds to the derivation (and multiplication by $z$) of the g
 
 As explained in \cite{BS} and \cite{MEMO}, pointing can offer advantages when manipulating Boltzmann Samplers. Those samplers rely heavily on tuning which is not always possible when the expected value is bounded, pointing can sometimes remove the boundary on the expected value.
 
+\subsection{Grammar pointing}
+
 Since the Boltzmann method use specifications, we need to be able to point a class given its specification. There are two main ways to do so, we can first introduce a new operator $PointOp$ which can be used like any other operator. Even though this solution is appealing this is not what has been done in practice, indeed contrary to other operator $Union, Sequence, etc...$, $PointOp$ doesn't have a clean recursive algorithm.
 
 Instead we use an alternate definition of pointing. We can define pointing as an operation on specifications:
@@ -312,13 +319,13 @@ where $\Psi_1, ..., \Psi_n$ are functions which only use the operator and basic 
 
 Then, a specification for $C_1^{\bullet}$ is:
 \begin{align*}
-\{\\
+\{&\\
 &C_1^{\bullet} &= &\Psi_1^{\bullet}(C_1^{\bullet}, C_1, ..., C_n^{\bullet}, C_n)\\
 &C_1 &= &\Psi_1(C_1, ..., C_n)\\
-...
+...\\
 &C_n^{\bullet} &= &\Psi_n^{\bullet}(C_1^{\bullet}, C_1, ..., C_n^{\bullet}, C_n)\\
 &C_n &= &\Psi_n(C_1, ..., C_n)\\ 
-\}
+\}&
 \end{align*}
 For a function $\Psi$, $\Psi^{\bullet}$ is defined recursively by
 \begin{itemize}
@@ -329,15 +336,30 @@ For a function $\Psi$, $\Psi^{\bullet}$ is defined recursively by
     \item
     $(A_1 + ... + A_n)^{\bullet} = A_1^{\bullet} + ... + A_n^{\bullet}$
     \item
-    $(A_1 \times ... \times A_n)^{\bullet} = A_1^{\bullet} \times ... \times A_n + ... + A_1 \times ... \times A_n^{\bullet}$
-    
+    $(A_1 \times ... \times A_n)^{\bullet} = A_1^{\bullet} \times A_2 \times ... \times A_n + ... + A_1 \times ... \times A_{n-1} \times A_n^{\bullet}$
+    \item
+    $(Seq(A))^{\bullet} = Seq(A) \times A^{\bullet} \times Seq(A)$
+    \item
+    $(Set(A))^{\bullet} = A^{\bullet} \times Set(A)$
+    \item
+    $(Cycle(A))^{\bullet} = A^{\bullet} \times Seq(A)$
 \end{itemize}
 \end{definition}
 
-\subsection{Grammar pointing}
+What has been said above for pointing remain true when using this definition of pointing.
+
+The following algorithm points a grammar in usainboltz.
+
 \begin{lstlisting}
+def GrammarPoint(g: Grammar):
+    #g.rules is a mapping of rulenames to their associated rule in the specification.
+    new_rules = g.rules.copy()
+    for (rulename, rule) in g.rules.items():
+        new_rules[Point(rulename)] = Point(rulename)
+    g.rules = new_rules
+
 #Some shortcuts are allowed: None-1 = None; (i-j) = max(0, i-j). Very useful for sizes constraints.
-def Point(S: SubRightRule) -> SubRightRule:
+def Point(S):
 	switch S:
 		case Atom():
 			return Atom()
