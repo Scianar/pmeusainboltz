@@ -158,22 +158,22 @@ def UnpointTp(t: tuple, S: SubRightRule, stop_at_rulename: bool) -> tuple:
 	switch S:
 		case Union(R1, ..., Rn):
 			Tp(i, tu) = t #This can raise an error if t has the wrong format.
-			return Tp(i, Unpoint(Ri, tu, stop_at_rulename))
+			return Tp(i, UnpointTp(Ri, tu, stop_at_rulename))
 		case Product(R1, ..., Rn):
 			Tp(i, Tp(t1, ..., tn)) = t
-			return Tp(t1, ..., Unpoint(Ri, ti, stop_at_rulename), ..., tn)
+			return Tp(t1, ..., UnpointTp(Ri, ti, stop_at_rulename), ..., tn)
 		case RuleName(A):
 			if stop_at_rulename:
-				#if A is associated with the right rule R in the grammar,
-				return Unpoint(t, R, True)
-			else:
 				return t
+			else:
+				#if A is associated with the right rule R in the grammar,
+				return UnpointTp(t, R, False)
 		case Cycle(R) | Set(R):
 			Tp(t1, Tp(t2, ..., tn))
 			return Tp(Unpoint(R, t1, stop_at_rulename), t2, ..., tn)
 		case Seq(R):
 			Tp(_, Tp(Tp(t_left_1, ..., t_left_n), t_pointed, Tp(t_right_1, ..., t_right_m))) = t
-			return Tp(t_left_1, ..., t_left_n, Unpoint(R, t_mid, stop_at_rulename), t_right_1, ..., t_right_m)
+			return Tp(t_left_1, ..., t_left_n, UnpointTp(R, t_mid, stop_at_rulename), t_right_1, ..., t_right_m)
 		case Epsilon() | Marker(_) | Zero():
 			raise Exception("Error")
 \end{lstlisting}
@@ -204,10 +204,10 @@ $t^v$ is called a left-hand acceptable tuple for $S$ and $t^b$ a right-hand acce
 
 We now define pointing.
 \begin{definition}[Context pointing]
-For a context $\Gamma = (G, M)$, the pointed context $\Gamma^{\bullet}$ is $\Gamma^{\bullet} = (G^{\bullet}, M^{\bullet})$. For $A \rightarrow R \in G$, $M^{\bullet}(A) = M(A)$ and $M^{\bullet}(A^{\bullet})(t^{b\bullet}) = M(A)(Unpoint(t^{b\bullet}, R))$ where $t^{b\bullet}$ is a right acceptable tuple for $R^{\bullet}$. As it will be seen later, $M(A)(Unpoint(t^{b\bullet}, R))$ is correctly defined.
+For a context $\Gamma = (G, M)$, the pointed context $\Gamma^{\bullet}$ is $\Gamma^{\bullet} = (G^{\bullet}, M^{\bullet})$. For $A \rightarrow R \in G$, $M^{\bullet}(A) = M(A)$ and $M^{\bullet}(A^{\bullet})(t^{b\bullet}) = M(A)(UnpointTp(t^{b\bullet}, R, True))$ where $t^{b\bullet}$ is a right acceptable tuple for $R^{\bullet}$. As it will be seen later, $M(A)(UnpointTp(t^{b\bullet}, R, True))$ is correctly defined.
 \end{definition}
 
-The unpointing algorithm is different for left-hand and right-hand tuples. Indeed the left-hand $t^v$ corresponds to our intuitive vision of a combinatorial structure represented by a tuple, $UnpointTp(t^v, A, True)$ convert the entire tuple into an unpoinited tuple. On the other hand, the right-hand $t^b$ is closer to what is really implemented, the builders functions create entirely new objects. Those builders are called repeatedly and unpointing the entire tuple directly is not possible, instead we need to unpoint each time we call a builder function. That's why we stop unpointing at rulenames.
+The unpointing algorithm is different for left-hand and right-hand tuples. Indeed the left-hand $t^v$ corresponds to our intuitive vision of a combinatorial structure represented by a tuple, $UnpointTp(t^v, A, False)$ convert the entire tuple into an unpoinited tuple. On the other hand, the right-hand $t^b$ is closer to what is really implemented, the builders functions create entirely new objects. Those builders are called repeatedly and unpointing the entire tuple directly is not possible, instead we need to unpoint each time we call a builder function. That's why we stop unpointing at rulenames.
 
 \begin{example}[Binary trees]
 We consider the following grammar for rooted binary trees:
@@ -259,19 +259,19 @@ The theory to prove the three following theorems has now been established.
 \begin{theorem}[UnpointTp is an unpointing operation.]
 Let $\Gamma = (G, M)$ be a context, $R$ a sub-right-rule appearing in $G$ and $t^{v\bullet}, t^{b\bullet}$ tuples.
  
- $\Gamma^{\bullet}:R^{\bullet} \vdash (t^{v\bullet}, t^{b\bullet})$ if and only if $Unpoint(t^{v\bullet}, R)$ is correctly defined, $Unpoint(t^{b\bullet}, R)$ is correctly defined and $\Gamma:R \vdash (UnpointTp(t^{v\bullet}, R), UnpointTp(t^{b\bullet}, R))$.
+ $\Gamma^{\bullet}:R^{\bullet} \vdash (t^{v\bullet}, t^{b\bullet})$ if and only if $UnpointTp(t^{v\bullet}, R, False)$ is correctly defined, $UnpointTp(t^{b\bullet}, R, True)$ is correctly defined and $\Gamma:R \vdash (UnpointTp(t^{v\bullet}, R, False), UnpointTp(t^{b\bullet}, R, True))$.
 \end{theorem}
 
 \begin{corollary}
-For a context $\Gamma = (G, M)$, $A \rightarrow R \in G$, $t^{b\bullet}$ a tuple. If $t^{b\bullet}$ is a right-hand acceptable tuple for $R^{\bullet}$. Then $M(A)(Unpoint(t^{b\bullet}, R))$ is correctly defined. Therefore $M^{\bullet}(A^{\bullet})$ is correctly defined.
+For a context $\Gamma = (G, M)$, $A \rightarrow R \in G$, $t^{b\bullet}$ a tuple. If $t^{b\bullet}$ is a right-hand acceptable tuple for $R^{\bullet}$. Then $M(A)(UnpointTp(t^{b\bullet}, R, True))$ is correctly defined. Therefore $M^{\bullet}(A^{\bullet})$ is correctly defined.
 \end{corollary}
 
 \begin{theorem}[UnpointTp respects the size of tuples]
-Let $\Gamma = (G, M)$ be a context, $R$ a sub-right-rule appearing in $G$ and $t^{v\bullet}, t^{b\bullet}$ tuples such that $\Gamma^{\bullet}: R^{\bullet} \vdash (t^{v\bullet}, t^{b\bullet})$. Then $UnpointTp(t^{v\bullet}, R)|_z = |t^{v\bullet}|_z$.
+Let $\Gamma = (G, M)$ be a context, $R$ a sub-right-rule appearing in $G$ and $t^{v\bullet}, t^{b\bullet}$ tuples such that $\Gamma^{\bullet}: R^{\bullet} \vdash (t^{v\bullet}, t^{b\bullet})$. Then $UnpointTp(t^{v\bullet}, R, False)|_z = |t^{v\bullet}|_z$.
 \end{theorem}
 
 \begin{theorem}[For $n$ tuples pointed of size $n$ there is one non pointed tuple]
-Let $\Gamma = (G, M)$ be a context, $R$ a sub-right-rule appearing in $G$ and $t^v, t^b$ tuples such that $\Gamma: R \vdash (t^v, t^b)$. Then $|\{t^{v\bullet} | UnpointTp(t^{v\bullet}, R) = t^v \text{ and $t^v$ is left-hand acceptable for $R^{\bullet}$}\}| = |t^v|_z$.
+Let $\Gamma = (G, M)$ be a context, $R$ a sub-right-rule appearing in $G$ and $t^v, t^b$ tuples such that $\Gamma: R \vdash (t^v, t^b)$. Then $|\{t^{v\bullet} | UnpointTp(t^{v\bullet}, R, False) = t^v \text{ and $t^v$ is left-hand acceptable for $R^{\bullet}$}\}| = |t^v|_z$.
 \end{theorem}
 
 All three theorems will be proven by an induction on sub-right-rules.
@@ -293,25 +293,25 @@ The pointing operation create new productions rules but doesn't modify any produ
 Base cases:
 \begin{itemize}
 	\item
-$R = Epsilon()$ then $R^{\bullet} = Zero()$, there are no inference rules associated with $Zero()$, therefore there are no $(t^{v\bullet}, t^{b\bullet})$ acceptable for $^R$. On the other hand, $Unpoint(t^v, Epsilon())$ raises an exception.
+$R = Epsilon()$ then $R^{\bullet} = Zero()$, there are no inference rules associated with $Zero()$, therefore there are no $(t^{v\bullet}, t^{b\bullet})$ acceptable for $R$. On the other hand, $UnpointTp(t^{v\bullet}, Epsilon(), False)$ raises an exception.
 
 	\item
 $Marker()$ and $Zero()$ are very similar to $Epsilon()$.
 
 	\item
-$R = Atom()$ therefore $R^{\bullet} = Atom()$. Then $UnpointTp(t^{v\bullet},R) = t^{v\bullet}$ and $UnpointTp(t^{b\bullet}, R) = t^{b\bullet}$ . If $\Gamma^{\bullet}: Atom() \vdash (t^{v\bullet}, t^{b\bullet})$, then we can apply the lemma to directly obtain the direct implication. The inverse implication is identical.
+$R = Atom()$ therefore $R^{\bullet} = Atom()$. Then $UnpointTp(t^{v\bullet}, R, False) = t^{v\bullet}$ and $UnpointTp(t^{b\bullet}, R, True) = t^{b\bullet}$ . If $\Gamma^{\bullet}: Atom() \vdash (t^{v\bullet}, t^{b\bullet})$, then we can apply the lemma to directly obtain the direct implication. The inverse implication is identical.
 \end{itemize}
 
-Recursive cases, to avoid too much repetition, there is only a proof for union, sequences and rulenames:
+Recursive cases, to avoid too much repetition, there is only a proof for unions, and rulenames:
 \begin{itemize}
 	\item
-$R = R_1 + ... + R_n$, then $R^{\bullet} = R_1^{\bullet} + ... + R_n^{\bullet}$. The only inference rule for union gives that $t^{v\bullet} = (i,t'^{v\bullet})$, $t^{b\bullet} = (i,t'^{b\bullet})$ with $1 \le i \le n$ and $\Gamma^{\bullet}: R_i^{\bullet} \vdash (t'^{v\bullet}, t'^{b\bullet})$. $R$ appears in $G$, therefore $R_i$ appears in $G$. By hypothesis, $\Gamma: R_i \vdash (UnpointTp(t'^{v\bullet}, R_i), UnpointTp(t'^{b\bullet}, R_i))$ we conclude by applying the inference rule for union and simplifying the UnpointTp expression. The inverse implication is identical.
+$R = R_1 + ... + R_n$, then $R^{\bullet} = R_1^{\bullet} + ... + R_n^{\bullet}$. The only inference rule for union gives that $t^{v\bullet} = (i,t'^{v\bullet})$, $t^{b\bullet} = Tp(i,t'^{b\bullet})$ with $1 \le i \le n$ and $\Gamma^{\bullet}: R_i^{\bullet} \vdash (t'^{v\bullet}, t'^{b\bullet})$. $R$ appears in $G$, therefore $R_i$ appears in $G$. By hypothesis, $\Gamma: R_i \vdash (UnpointTp(t'^{v\bullet}, R_i, False), UnpointTp(t'^{b\bullet}, R_i, True))$ we conclude by applying the inference rule for union and simplifying the UnpointTp expression. The inverse implication is identical.
 
 	\item
 If $R = A$ is a rulename such that $A \rightarrow S \in G$, the corresponding inference rule is the simplification. Therefore there exists a right hand acceptable tuple $t^{'b\bullet}$ associated with $t^{v\bullet}$ for $S^{\bullet}$ such that $M^{\bullet}(A^{\bullet})(t'^{b\bullet}) = t^{b\bullet}$. We can apply the hypothesis of induction on $S$:
-$$\Gamma: S \vdash (Unpoint(t^{v\bullet}, S), Unpoint(t^{'b\bullet}, S))$$
+$$\Gamma: S \vdash (Unpoint(t^{v\bullet}, S, False), Unpoint(t^{'b\bullet}, S, True))$$
 
-$M(A)(Unpoint(t^{'b\bullet})) = M^{\bullet}(A^{\bullet})(t^{'b\bullet}) = t^{b\bullet} = Unpoint(t^{b\bullet}, A)$. By applying the inference rule for simplification, $$\Gamma: A\vdash (UnpointTp(t^{v\bullet}, A), M(A)(Unpoint(t^{'b\bullet}))) = (UnpointTp(t^{v\bullet}, A), UnpointTp(t^{b\bullet}, A))$$
+$M(A)(UnpointTp(t^{'b\bullet}, R, True)) = M^{\bullet}(A^{\bullet})(t^{'b\bullet}) = t^{b\bullet} = UnpointTp(t^{b\bullet}, A, True)$. By applying the inference rule for simplification, $$\Gamma: A\vdash (UnpointTp(t^{v\bullet}, A, False), M(A)(UnpointTp(t^{'b\bullet}, R, True))) = (UnpointTp(t^{v\bullet}, A, False), UnpointTp(t^{b\bullet}, A, True))$$
 
 The inverse implication is identical.
 \end{itemize}
@@ -319,21 +319,22 @@ The inverse implication is identical.
 \end{proof}
 
 \begin{proof}[Unpoint respects the size of tuples]
-Basic cases:
+Base cases
 \begin{itemize}
 	\item
-$A = Epsilon()$, comme expliqué plus haut, ce cas ne peut pas se produire.
+$R = Epsilon()$, as explained above, this situation can't occur.
 	\item
-Il en va de même pour $Marker(_)$ et $Epsilon()$.
+The same argument can be used for $Marker(\_)$ and $Zero()$
 	\item
-$A = Atom()$, alors $t = Atom()$, donc $t = Unpoint(t,A)$ et donc $|t|_z = Unpoint(t, A)_z$.
+$R = Atom()$, therefore $t^{v\bullet} = t^{b\bullet} = Atom()$, and $UnpointTp(., R, _)$ is the identity.
 \end{itemize}
-Cas récursifs:
+Recursive cases (again on union and rulenames).
 \begin{itemize}
 	\item
-$A = A_1 + ... + A_n$, donc $t = (i, t')$. Par induction, $|Unpoint(t', A_i)|_z = |t'|_z$. Or, $|(i, t')|_z = |t'|_z$ et $Unpoint((i, t'), A) = Unpoint(t', A_i)$, ce qui est suffisant pour conclure.
+$R = R_1 + ... + R_n$, therefore $t^{v\bullet} = Tp(i, t^{'v\bullet})$. By induction, $|UnpointTp(t^{'v\bullet}, R_i, False)|_z = |t{'^v\bullet}|_z$. Knowing that $|(i, t^{'v\bullet})|_z = |t{'v\bullet}|_z$ and $UnpointTp(Tp(i, t^{'v\bullet}), R, False) = UnpointTp(t^{'v\bullet}, R_i, False)$, we have enough to conclude.
+
 	\item
-$A$ est une classe auxiliaire. On se donne $t'$, $B$ et $R$ tel que: $t = (t', B(t'))$ et $\Gamma^{\bullet}: R^{\bullet} \vdash t'$. À nouveau, on peut conclure en appliquant l'induction. 
+If $R = A$ is a rulename such that $A \rightarrow S \in G$, the corresponding inference rule is the simplification. Moreover $UnpointTp(_, A, True)$ is the identity which is enough to conclude by induction.
 \end{itemize}
 \end{proof}
 \end{document}
