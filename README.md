@@ -36,7 +36,7 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 (Entamé, dernière preuve à construire, peut-être complété autres preuves, peut-être rajouter un exemple)
 
 - Rajout de MSET, PSET, UCYCLE
-(probleme pour PSET, MSET fait par Martin, UCYCLE à moitié testé)
+(probleme pour PSET, MSET fait par Martin, UCYCLE à moitié testé, UCYCLE pas bien fait pour taille fixée à k, à refaire)
 
 - Mise en place de MSET et cycle non étiqueté pour la grammaire.
 (fait pour la grammaire et insertion de la grammaire dans le générateur)
