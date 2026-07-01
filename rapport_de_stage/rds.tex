@@ -289,9 +289,50 @@ My task for this internship was to implement the pointing method in the Usainbol
 As explained above, when a class has a specification, we have the guarantee that each element of size $n$ has exactly $n$ atoms, from this we can deduce a new operator on class:
 
 \begin{definition}[Pointing]
-Let {\rsfs C} be a specifiable combinatorial class
+Let {\rsfs C} be a specifiable combinatorial class, we consider the class $\text{\rsfs C}^{\bullet} = \{(C, c) | C \in \text{\rsfs C},\text{c is an atom of C}\}$ such that $|(C,c)|_{\text{\rsfs C}^\bullet} = |C|_{\text{\rsfs C}}$.
 \end{definition}
 
+This operator corresponds to the derivation (and multiplication by $z$) of the generating function, both in the labelled and unlabelled case: $C^{\bullet}(z) = z C'(z)$.
+
+As explained in \cite{BS} and \cite{MEMO}, pointing can offer advantages when manipulating Boltzmann Samplers. Those samplers rely heavily on tuning which is not always possible when the expected value is bounded, pointing can sometimes remove the boundary on the expected value.
+
+Since the Boltzmann method use specifications, we need to be able to point a class given its specification. There are two main ways to do so, we can first introduce a new operator $PointOp$ which can be used like any other operator. Even though this solution is appealing this is not what has been done in practice, indeed contrary to other operator $Union, Sequence, etc...$, $PointOp$ doesn't have a clean recursive algorithm.
+
+Instead we use an alternate definition of pointing. We can define pointing as an operation on specifications:
+\begin{definition}[Pointing]
+We consider the specification of $C_1$:
+\begin{align*}
+\{\\
+&C_1 &= &\Psi_1(C_1, ..., C_n)\\
+...
+&C_n &= &\Psi_n(C_1, ..., C_n)\\ 
+\}
+\end{align*}
+where $\Psi_1, ..., \Psi_n$ are functions which only use the operator and basic class: $Atom(), Zero(), Epsilon(), +, \times, Seq, Set, Cycle$.
+
+Then, a specification for $C_1^{\bullet}$ is:
+\begin{align*}
+\{\\
+&C_1^{\bullet} &= &\Psi_1^{\bullet}(C_1^{\bullet}, C_1, ..., C_n^{\bullet}, C_n)\\
+&C_1 &= &\Psi_1(C_1, ..., C_n)\\
+...
+&C_n^{\bullet} &= &\Psi_n^{\bullet}(C_1^{\bullet}, C_1, ..., C_n^{\bullet}, C_n)\\
+&C_n &= &\Psi_n(C_1, ..., C_n)\\ 
+\}
+\end{align*}
+For a function $\Psi$, $\Psi^{\bullet}$ is defined recursively by
+\begin{itemize}
+    \item
+    $Atom()^{\bullet} = Atom()$
+    \item
+    $Epsilon()^{\bullet} = Zero()^{\bullet} = Zero()$
+    \item
+    $(A_1 + ... + A_n)^{\bullet} = A_1^{\bullet} + ... + A_n^{\bullet}$
+    \item
+    $(A_1 \times ... \times A_n)^{\bullet} = A_1^{\bullet} \times ... \times A_n + ... + A_1 \times ... \times A_n^{\bullet}$
+    
+\end{itemize}
+\end{definition}
 
 \subsection{Grammar pointing}
 \begin{lstlisting}
