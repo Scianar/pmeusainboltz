@@ -271,7 +271,7 @@ Let $\Gamma = (G, M)$ be a context, $R$ a sub-right-rule appearing in $G$ and $t
 \end{theorem}
 
 \begin{theorem}[For $n$ tuples pointed of size $n$ there is one non pointed tuple]
-Let $\Gamma = (G, M)$ be a context, $R$ a sub-right-rule appearing in $G$ and $t^v, t^b$ tuples such that $\Gamma: R \vdash (t^v, t^b)$. Then $|\{t^{v\bullet} | UnpointTp(t^{v\bullet}, R, False) = t^v \text{ and $t^v$ is left-hand acceptable for $R^{\bullet}$}\}| = |t^v|_z$.
+Let $\Gamma = (G, M)$ be a context, $R$ a sub-right-rule appearing in $G$ and $t^v, t^b$ tuples such that $\Gamma: R \vdash (t^v, t^b)$. Then $|\{t^{v\bullet} | UnpointTp(t^{v\bullet}, R, False) = t^v \text{ and $t^{v\bullet}$ is left-hand acceptable for $R^{\bullet}$}\}| = |t^v|_z$.
 \end{theorem}
 
 All three theorems will be proven by an induction on sub-right-rules.
@@ -335,6 +335,23 @@ $R = R_1 + ... + R_n$, therefore $t^{v\bullet} = Tp(i, t^{'v\bullet})$. By induc
 
 	\item
 If $R = A$ is a rulename such that $A \rightarrow S \in G$, the corresponding inference rule is the simplification. Moreover $UnpointTp(_, A, True)$ is the identity which is enough to conclude by induction.
+\end{itemize}
+\end{proof}
+
+\begin{proof}[For $n$ tuples pointed of size $n$ there is one non pointed tuple]
+Base cases:
+\begin{itemize}
+	\item If $R = Epsilon()$ (or $Marker(_)$ or $Zero()$), then $|t^v|_z = 0$ and there are no $t^{v\bullet}$ right-hand acceptable for $R^{\bullet}$, therefore $|\{t^{v\bullet} | UnpointTp(t^{v\bullet}, R, False) = t^v \text{ and $t^{v\bullet}$ is left-hand acceptable for $R^{\bullet}$}\}| = 0$.
+
+	\item If $R = Atom()$, then $t^v = Atom()$ and $|t^v|_z = 1$. There is exactly one right-hand acceptable tuple $t^v{\bullet}$ such that $UnpointTp(t^{v\bullet}, R, False) = t^v$: $t^{v\bullet} = Atom()$. This is enough to conclude.
+\end{itemize}
+Recursive cases (only for product):
+\begin{itemize}
+	\item If $R = R_1 \times ... \times R_n$, then $t^v = Tp(t^v_1, ..., t^v_n)$. For any $t^{v\bullet}$ such that $Unpoint(t^{v\bullet}, R^{\bullet}, False) = t^v$, we know that $t^v{\bullet}$ is of the form: $$t^{v\bullet} = Tp(i, Tp(t^v_1, ..., t^v_{i-1}, t^{v\bullet}_i, t^v_{i+1}, ..., t^v_n))$$
+
+	Therefore,
+	\begin{align*} \{t^{v\bullet} | UnpointTp(t^{v\bullet}, R, False) = t^v \text{ and $t^{v\bullet}$ is left-hand acceptable for $R^{\bullet}$}\} = \\ \displaystyle \uplus_{i=1}^n \{t^{v\bullet}_i | UnpointTp(t^{v\bullet}_i, R, False) = t^v_i \text{ and $t^{v\bullet}_i$ is left-hand acceptable for $R_i^{\bullet}$}\}
+	\end{align*}. We can conlude by applying the hypothesis of induction on each $R_i$.
 \end{itemize}
 \end{proof}
 \end{document}

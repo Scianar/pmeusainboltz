@@ -40,7 +40,7 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 
 - Mise en place de MSET et cycle non étiqueté pour la grammaire.
 (fait pour la grammaire et insertion de la grammaire dans le générateur,
-MSETCP non borné et partiellement UCYCLECP non borné, non testé)
+MSETCP et UCYCLECP non borné, non testé)
 
 - Rédaction du rapport de stage.
 (Entamé, 11 pages, un peu brouillon changer la definition de labelled et unlabelled pour le début, besoin d'exemples).
