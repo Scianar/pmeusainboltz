@@ -4,6 +4,7 @@
 \usepackage{semantic}
 \usepackage{listings}
 \usepackage{amsfonts}
+\usepackage{semantic}
 \newtheorem{theorem}{Theorem}
 \newtheorem{example}{Example}
 \newtheorem{proof}{Proof}
@@ -38,7 +39,7 @@
 \begin{document}
 \maketitle
 \section{Introduction}
-The internship was with Martin Pépin and Matthieu Dien as internship supervisors. The goal was to code and integrate pointing to the python library Usainboltz. This library implements the Boltzmann method which allows fast uniform sampling on combinatorial class at a fixed size \cite{BS}.
+The internship was with Martin Pépin and Matthieu Dien as internship supervisors. The goal was to code and integrate pointing to the python library Usainboltz \cite{USAINBOLTZ}. This library implements the Boltzmann method which allows fast uniform sampling on combinatorial class at a fixed size \cite{BS}.
 
 
 \section{Background}
@@ -106,7 +107,7 @@ Those three constructions have equivalent definitions with bounds on their numbe
 Using only products, unions, sequences, sets, cycles and finite sets to build class offer a very limited range of possibilities close to the expression level of regular languages. We can use recursive definition to obtain a range closer to context-free grammar.
 
 \begin{definition}[specification]
-A specification of a class of combinatorial structures {\rsfs C} is a set of (possibly recursive) equations using only operations described above, atoms and epsilons such that {\rsfs C} is the unique solution to the primary equation (up to an isomorphism).
+A specification of a class of combinatorial structures {\rsfs C} is a set of (possibly recursive) equations using only operations described above, atoms, epsilons and zeros such that {\rsfs C} is the unique solution to the primary equation (up to an isomorphism).
 
 {\rsfs C} is said to be specifiable if it admits a specification of finite size.
 \end{definition}
@@ -395,13 +396,64 @@ def Point(S):
 				Product(Seq(R, eq = j-2), Point(R), Seq(R, leq = None, geq = 1)),
 				Product(Seq(R, geq = j-1), Point(R), Seq(R)))
 \end{lstlisting}
-
-
-
-
 \subsection{Builder Pointing}
-\section{Cycle Pointing}
+One important element in usainboltz, as mentionned above, is the usage of builders. The user can provide building functions which will be called each time an auxiliary class is reached. However, when a class is pointed the associated builder can't be used on the pointed class as the underlying structure has changed. The first solution is to require the user to provide a new builder function, this is not optimal as the user needs to know what the pointed grammar looks like. Moreover, pointing a grammar can be made automatic and the user might not be aware that the grammar has been pointed.
 
+The second solution (the one I implemented in Usainboltz) is to derive pointed builders (i.e. builders for pointed class) from the builders provided by the user and the grammar structure. To do so, we need to first define what is an acceptable tuple for a grammar, then we can provide and prove the correctness of our algorithm. This has been done in details in \cite{LAPIN}, we offer here a quick overview of the main idea behind this theory.
+
+To differentiate python tuple from mathematical couple, we use the prefix $Tp$ when noting a python tuple.
+
+\begin{definition}[Acceptable tuple for a grammar]
+A context $\Gamma$ is a couple $\Gamma = (G, M)$ where $G$ is a grammar and $M$ is a mapping such that for all rulenames $A$ present in $G$, $\mathcal{B} = M(A)$ is a function which takes as argument, an acceptable tuple for $A$.
+
+For $\Gamma$ a context, $R$ a rule appearing in a production rule of $G$ and $t$ a tuple, we say that $t$ is acceptable for $R$, and we write $\Gamma: R\vdash t$, if and only if this proposition can be obtained from a set of inference rules. Here we only show a couple of them, see \cite{LAPIN} for an exhaustive description of the inference rules.
+$$\inference{}{\Gamma: Atom() \vdash Tp(Atom(),)}[Atom]$$
+
+$$\inference{\Gamma: R_1 \vdash t_1\quad ... \quad \Gamma:R_n\vdash t_n}{\Gamma: R_1 \times ... \times R_n \vdash Tp(t_1, ..., t_n)}[Product]$$
+
+$$\inference{\text{$A$ is an auxiliary class associated with the rule $R$ in $G$} \quad \Gamma: R \vdash t}{\Gamma: A \vdash Tp(M(A)(t),)}[Simplification]$$
+\end{definition}
+
+We also define the $UnpointTp$ algorithm which will be used to derive pointed builders:
+\begin{lstlisting}
+def UnpointTp(t: tuple, S: Rule) -> tuple:
+    switch S:
+        case Union(R1, ..., Rn):
+            Tp(i, tu) = t #This can raise an error if t has the wrong format.
+            return Tp(i, UnpointTp(Ri, tu, stop_at_rulename))
+        case Product(R1, ..., Rn):
+            Tp(i, Tp(t1, ..., tn)) = t
+            return Tp(t1, ..., UnpointTp(Ri, ti, stop_at_rulename), ..., tn)
+        case RuleName(A):
+            return t
+        case Cycle(R) | Set(R):
+            Tp(t1, Tp(t2, ..., tn))
+            return Tp(Unpoint(R, t1, stop_at_rulename), t2, ..., tn)
+        case Seq(R):
+            Tp(_, Tp(Tp(t_left_1, ..., t_left_n), t_pointed, Tp(t_right_1, ..., t_right_m))) = t
+            return Tp(t_left_1, ..., t_left_n, UnpointTp(R, t_mid, stop_at_rulename), t_right_1, ..., t_right_m)
+        case Epsilon() | Zero():
+            raise Exception("Error")
+\end{lstlisting}
+
+This is important to note that this algorithm stops when an auxiliary class is reached.
+
+Finally, we define a pointed context:
+\begin{definition}[Pointed context]
+For a context $\Gamma = (G, M)$, the pointed context $\Gamma^{\bullet}$ is $\Gamma^{\bullet} = (G^{\bullet}, M^{\bullet})$. For $A \rightarrow R$ a production rule of $G$, $M^{\bullet}(A) = M(A)$ and $M^{\bullet}(A^{\bullet})(t^\bullet) = M(A)(UnpointTp(t^{\bullet}, R))$ where $t^{b\bullet}$ is an acceptable tuple for $R^{\bullet}$.
+\end{definition}
+
+For this definition to be correct, we need to make sure that $UnpointTp(t^{\bullet}, R)$ is an acceptable tuple for $A$.
+
+\begin{theorem}[Correctness of $UnpointTp$]
+Let $\Gamma = (G, M)$ be a context, $R$ a rule appearing in $G$ and $t^{\bullet}$ a tuple.
+ 
+ $\Gamma^{\bullet}:R^{\bullet} \vdash t^{\bullet}$ if and only if $UnpointTp(t^{\bullet}, R)$ is correctly defined and $\Gamma:R \vdash UnpointTp(t^{v\bullet}, R)$.
+\end{theorem}
+
+The proof has be done in \cite{LAPIN}.
+\section{Cycle Pointing}
+As mentionned previously, some unlabelled constructions have been omitted.
 
 \bibliographystyle{plain}
 \bibliography{refs}

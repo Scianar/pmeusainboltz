@@ -4,45 +4,46 @@ The top-level auxiliary file: rds.aux
 The style file: plain.bst
 Database file #1: refs.bib
 Warning--empty journal in MEMO
-You've used 2 entries,
+Warning--empty journal in LAPIN
+You've used 4 entries,
             2118 wiz_defined-function locations,
-            509 strings with 4297 characters,
-and the built_in function-call counts, 709 in all, are:
-= -- 70
-> -- 30
+            518 strings with 4513 characters,
+and the built_in function-call counts, 1152 in all, are:
+= -- 112
+> -- 50
 < -- 1
-+ -- 12
-- -- 10
-* -- 42
-:= -- 120
-add.period$ -- 6
-call.type$ -- 2
-change.case$ -- 11
++ -- 20
+- -- 16
+* -- 62
+:= -- 203
+add.period$ -- 12
+call.type$ -- 4
+change.case$ -- 20
 chr.to.int$ -- 0
-cite$ -- 3
-duplicate$ -- 30
-empty$ -- 50
-format.name$ -- 10
-if$ -- 148
+cite$ -- 6
+duplicate$ -- 50
+empty$ -- 84
+format.name$ -- 16
+if$ -- 236
 int.to.chr$ -- 0
-int.to.str$ -- 2
-missing$ -- 2
-newline$ -- 13
-num.names$ -- 4
-pop$ -- 13
+int.to.str$ -- 4
+missing$ -- 4
+newline$ -- 23
+num.names$ -- 8
+pop$ -- 24
 preamble$ -- 1
-purify$ -- 9
+purify$ -- 16
 quote$ -- 0
-skip$ -- 26
+skip$ -- 41
 stack$ -- 0
-substring$ -- 42
-swap$ -- 10
+substring$ -- 52
+swap$ -- 11
 text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 8
-warning$ -- 1
-while$ -- 7
-width$ -- 3
-write$ -- 22
-(There was 1 warning)
+type$ -- 16
+warning$ -- 2
+while$ -- 11
+width$ -- 5
+write$ -- 41
+(There were 2 warnings)

@@ -6,6 +6,17 @@ Vannereux A.
   c'est mon mémo, vive les lapins!).
 \newblock 2026.
 
+\bibitem{LAPIN}
+Vannereux A.
+\newblock tuple conversion in usainboltz for pointing.
+\newblock 2026.
+
+\bibitem{USAINBOLTZ}
+Pepin M. and Dien M.
+\newblock Uniform sampling with boltzmann.
+\newblock {\em 25th International Symposium on Symbolic and Numeric Algorithms
+  for Scientific Computing}, 2023.
+
 \bibitem{BS}
 Flajolet P., Duchon P., Louchard G., and Schaeffer G.
 \newblock Boltzmann samplers for the random generation of combinatorial

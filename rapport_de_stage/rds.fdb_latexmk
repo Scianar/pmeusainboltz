@@ -1,14 +1,15 @@
 # Fdb version 4
-["bibtex rds"] 1782822673.62749 "rds.aux" "rds.bbl" "rds" 1782822677.39675 0
-  "./refs.bib" 1782822610.61373 1561 327d5dd6a099a15247239d26eed46311 ""
+["bibtex rds"] 1783002227.12041 "rds.aux" "rds.bbl" "rds" 1783002231.26314 0
+  "./refs.bib" 1783002219.20308 1897 9c1a8bf136da53ecc5ea938ae51534ff ""
   "/usr/share/texlive/texmf-dist/bibtex/bst/base/plain.bst" 1292289607 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "rds.aux" 1782822676.17391 1088 578c7edc9668fd0cabd62c062e50ba1b "lualatex"
+  "rds.aux" 1783002229.92134 1344 1088d281550cec649ede3cf21ec8c036 "lualatex"
   (generated)
   "rds.bbl"
   "rds.blg"
   (rewritten before read)
-["lualatex"] 1782822673.88421 "rds.tex" "rds.pdf" "rds" 1782822677.3975 0
+["lualatex"] 1783002227.45512 "rds.tex" "rds.pdf" "rds" 1783002231.26374 0
   "/home/scianar/.texlive2023/texmf-var/luatex-cache/generic/fonts/otl/lmroman10-bold.luc" 1772564776.05821 128392 cc9893d1631ce94f31c1896bb041be89 ""
+  "/home/scianar/.texlive2023/texmf-var/luatex-cache/generic/fonts/otl/lmroman10-bolditalic.luc" 1783000227.09165 136473 5b9cae8284919413f715c1372f2710a1 ""
   "/home/scianar/.texlive2023/texmf-var/luatex-cache/generic/fonts/otl/lmroman10-italic.luc" 1777560042.28108 136294 b20655adeff86618736b3a30e93973df ""
   "/home/scianar/.texlive2023/texmf-var/luatex-cache/generic/fonts/otl/lmroman10-regular.luc" 1772564775.54518 127309 677951b359b90ddbfa3eb54f696122f6 ""
   "/home/scianar/.texlive2023/texmf-var/luatex-cache/generic/fonts/otl/lmroman12-bold.luc" 1777560042.00507 128281 c6f80f39b6b4f903e4339f6819ec2ecc ""
@@ -53,8 +54,10 @@
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb" 1248133631 37912 77d683123f92148345f3fc36a38d9ab1 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb" 1248133631 36281 c355509802a035cadc5f15869451dcee ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb" 1248133631 35752 024fb6c41858982481f6968b5fc26508 ""
+  "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb" 1248133631 31809 8670ca339bf94e56da1fc21c80635e2a ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb" 1248133631 32762 224316ccc9ad3ca0423a14971cfa7fc1 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb" 1248133631 32569 5e5ddc8df908dea60932f3c484a54c0d ""
+  "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb" 1248133631 32915 7bf7720c61a5b3a7ff25b0964421c9b6 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb" 1248133631 32716 08e384dc442464e7285e891af9f45947 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb" 1248133631 34694 ad62b13721ee8eda1dcc8993c8bd7041 ""
   "/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm7.pfb" 1248133631 35309 940e81a5b9e04201a07e8b33a3ae6e64 ""
@@ -138,6 +141,7 @@
   "/usr/share/texlive/texmf-dist/tex/luatex/luaotfload/luaotfload-unicode.lua" 1693603203 7917 2ac5fb697191fbe7f30f4ab4e5f7037b ""
   "/usr/share/texlive/texmf-dist/tex/luatex/luaotfload/luaotfload.lua" 1693603203 13565 c514d92e6ff6be7b2f35d8e0eb56185c ""
   "/usr/share/texmf/fonts/opentype/public/lm/lmroman10-bold.otf" 1255129361 111240 0af0b64d6d3df41bead3f9de314afbd4 ""
+  "/usr/share/texmf/fonts/opentype/public/lm/lmroman10-bolditalic.otf" 1255129361 118204 71070e299cf063366237473420b0fea8 ""
   "/usr/share/texmf/fonts/opentype/public/lm/lmroman10-italic.otf" 1255129361 118828 4d461c73423fe2666dad2ff0dfc3ca68 ""
   "/usr/share/texmf/fonts/opentype/public/lm/lmroman10-regular.otf" 1255129361 111536 ae9d1b331000d544f47e5223081b7b54 ""
   "/usr/share/texmf/fonts/opentype/public/lm/lmroman12-bold.otf" 1255129361 110496 b9c8767d4cc3bf3f4b21f676bf89aa78 ""
@@ -148,9 +152,9 @@
   "/usr/share/texmf/fonts/opentype/public/lm/lmroman8-regular.otf" 1255129361 111948 cee9e390fd6d23cfb4d6871ba2a9ee5b ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1762377971.60325 5472669 54eaf61a88b6b7896ebd0dac973cb29c ""
   "/var/lib/texmf/web2c/luahbtex/lualatex.fmt" 1762378103 12232081 cf3ecfd4ac94c294f77ab9ae8d72b143 ""
-  "rds.aux" 1782822676.17391 1088 578c7edc9668fd0cabd62c062e50ba1b "lualatex"
-  "rds.bbl" 1782822673.8678 447 c7562494a3b6351857207ac3211bf173 "bibtex rds"
-  "rds.tex" 1782822647.42752 15695 12652e25d5067f9e1e73e2e5fcedfdad ""
+  "rds.aux" 1783002229.92134 1344 1088d281550cec649ede3cf21ec8c036 "lualatex"
+  "rds.bbl" 1783002227.4144 748 565cf55806b894eaf2d30f2636069bf0 "bibtex rds"
+  "rds.tex" 1783002185.42755 26906 320f7ca2fe0dfdfa968c662e519b0cae ""
   (generated)
   "rds.aux"
   "rds.log"
