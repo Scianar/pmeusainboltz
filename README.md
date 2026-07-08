@@ -36,11 +36,13 @@ Implementation de la méthode de pointage pour Boltzmann dans usainboltz.
 (Entamé, dernière preuve à construire, peut-être complété autres preuves, peut-être rajouter un exemple)
 
 - Rajout de MSET, PSET, UCYCLE
-(probleme pour PSET, MSET fait par Martin, UCYCLE à moitié testé)
+(PSET fait non testé, MSET fait par Martin non testé, UCYCLE à moitié testé)
 
-- Mise en place de MSET et cycle non étiqueté pour la grammaire.
+- Mise en place de MSETCP et UCYCLECP non étiqueté pour la grammaire.
 (fait pour la grammaire et insertion de la grammaire dans le générateur,
 MSETCP et UCYCLECP non borné, non testé)
 
 - Rédaction du rapport de stage.
 (Entamé, 11 pages, un peu brouillon changer la definition de labelled et unlabelled pour le début, besoin d'exemples).
+
+- Implémenter dérivation par rapport à une rulename.

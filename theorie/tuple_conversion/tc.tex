@@ -56,22 +56,36 @@ Some aspects present in the real algorithms are simplified:
 We first define sub-right-rules:
 \begin{definition}
 A sub-right-rule (which can be read as a sub rule of the right of a production rule in a grammar) is defined by induction:
-$$Atom(),\;Epsilon(),\;Marker(name),\;RuleName(name) \text{    for name a character chain.}$$
+$$Atom(),\;Epsilon(),\;Marker(name),\;RuleName(name),\;Zero() \text{    for name a character chain.}$$
 are sub-right-rules.
 \\\\
 If $R$, $R_1$, ..., $R_n$ are sub-right-rules,
 $$Union(R_1, ..., R_n), Product(R_1, ..., R_n), Seq(R), Set(R), Cycle(R)$$
 are sub-right-rules.
 
+To help with understanding, here is the grammar associated with sub-right-rules:
+\begin{align*}
+R \rightarrow &Atom() &|\\
+&Epsilon() &|\\
+&Marker(name) &|\\
+&RuleName(name) &|\\
+&Zero() &|\\
+&Union(R, ..., R) &|\\
+&Product(R, ..., R) &|\\
+&Seq(R) &|\\
+&Set(R) &|\\
+&Cycle(R)
+\end{align*}
+
 For $R$ a sub-right-rule, we say that $S$ another sub-right-rule appear in $R$ if $R$ can be obtained by induction with $S$ as one of $R$ base element.
 \end{definition}
 
 \begin{example}
-$R = Union(Product(Atom(), Epsilon(), Epsilon()), Atom())$ is a sub-right-rule.
+$R = Product(Atom(), Epsilon())$ is a sub-right-rule.
 \\
-$S_1 = Product(Atom(), Epsilon(), Epsilon())$ appears in $R$ because $Union(S_1, Atom()) = R$.
+$S_1 = Atom()$ appears in $R$ because $Product(S_1, Epsilon()) = R$.
 \\
-$S_2 = Product(Atom(), Epsilon())$ doesn't appear in $R$ because $Product(Product(Atom(,  Epsilon()), Epsilon()) \ne Product(Atom(), Epsilon(), Epsilon())$ (je sais pas comment finir ce cas).
+$S_2 = Zero()$ doesn't appear in $R$.
 \end{example}
 
 From this definition we can define a grammar.

@@ -5,6 +5,7 @@
 \usepackage{listings}
 \usepackage{amsfonts}
 \usepackage{semantic}
+\usepackage[a4paper, total={7in, 8in}]{geometry}
 \newtheorem{theorem}{Theorem}
 \newtheorem{example}{Example}
 \newtheorem{proof}{Proof}
@@ -453,7 +454,28 @@ Let $\Gamma = (G, M)$ be a context, $R$ a rule appearing in $G$ and $t^{\bullet}
 
 The proof has be done in \cite{LAPIN}.
 \section{Cycle Pointing}
-As mentionned previously, some unlabelled constructions have been omitted.
+\subsection{New unlabelled construction}
+Vector pointing is enough for the operations defined above, but 
+
+As mentionned previously, some unlabelled constructions have been omitted. We will now see three new unlabelled constructions:
+
+\begin{definition}[MSet]
+If {\rsfs C} is an unlabelled class, then $MSet(\text{\rsfs C})$ is the class of sets of elements of {\rsfs C} where repetitions are allowed.
+\end{definition}
+
+\begin{definition}[UCycle]
+If {\rsfs C} is an unlabelled class, then $UCycle(\text{\rsfs C})$ is defined identically as for the labelled case (in fact, we could use the same notation $Cyc$).
+\end{definition}
+
+\begin{definition}[PSet]
+If {\rsfs C} is an unlabelled class, then $Pset(\text{\rsfs C})$ is the class of sets of elements of {\rsfs C} where no repetitions are allowed.
+\end{definition}
+
+Unlabelled cycles and power sets were not implemented at first in usainboltz, I also implemented the two during the internship. We will only cover the case for not bounded rules, the probability distribution in the bounded case is completely different.
+
+I want to add a description of the generation for MSET, UCYCLE and PSET in the future.
+
+\subsection{Pointing MSET and UCYCLE}
 
 \bibliographystyle{plain}
 \bibliography{refs}

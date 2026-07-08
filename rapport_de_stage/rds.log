@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.11.5)  2 JUL 2026 16:26
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.11.5)  3 JUL 2026 13:19
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -177,45 +177,102 @@ LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
 LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
 (Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
 )
-\c@theorem=\count284
-\c@example=\count285
-\c@proof=\count286
-\c@lemma=\count287
-\c@property=\count288
-\c@definition=\count289
+(/usr/share/texlive/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2020/01/02 v5.9 Page Geometry
+
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/ifvtex.sty
+Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
+
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/iftex.sty
+Package: iftex 2022/02/03 v1.0f TeX engine tests
+))
+\Gm@cnth=\count284
+\Gm@cntv=\count285
+\c@Gm@tempcnt=\count286
+\Gm@bindingoffset=\dimen155
+\Gm@wd@mp=\dimen156
+\Gm@odd@mp=\dimen157
+\Gm@even@mp=\dimen158
+\Gm@layoutwidth=\dimen159
+\Gm@layoutheight=\dimen160
+\Gm@layouthoffset=\dimen161
+\Gm@layoutvoffset=\dimen162
+\Gm@dimlist=\toks32
+)
+\c@theorem=\count287
+\c@example=\count288
+\c@proof=\count289
+\c@lemma=\count290
+\c@property=\count291
+\c@definition=\count292
 
 (/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2023/02/27 1.9 listings language file
 )
 (/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count290
+\l__color_backend_stack_int=\count293
 \l__pdf_internal_box=\box59
 )
 (./rds.aux)
 \openout1 = `rds.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 39.
-LaTeX Font Info:    ... okay on input line 39.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 39.
-LaTeX Font Info:    ... okay on input line 39.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 39.
-LaTeX Font Info:    ... okay on input line 39.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 39.
-LaTeX Font Info:    ... okay on input line 39.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 39.
-LaTeX Font Info:    ... okay on input line 39.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 39.
-LaTeX Font Info:    ... okay on input line 39.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 39.
-LaTeX Font Info:    ... okay on input line 39.
-\c@lstlisting=\count291
-LaTeX Font Info:    Trying to load font information for U+msa on input line 40.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 40.
+LaTeX Font Info:    ... okay on input line 40.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 40.
+LaTeX Font Info:    ... okay on input line 40.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 40.
+LaTeX Font Info:    ... okay on input line 40.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 40.
+LaTeX Font Info:    ... okay on input line 40.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 40.
+LaTeX Font Info:    ... okay on input line 40.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 40.
+LaTeX Font Info:    ... okay on input line 40.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 40.
+LaTeX Font Info:    ... okay on input line 40.
+\c@lstlisting=\count294
 
- (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: a4paper
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: 
+* h-part:(L,W,R)=(45.80893pt, 505.89pt, 45.80894pt)
+* v-part:(T,H,B)=(106.75473pt, 578.15999pt, 160.13213pt)
+* \paperwidth=597.50787pt
+* \paperheight=845.04684pt
+* \textwidth=505.89pt
+* \textheight=578.15999pt
+* \oddsidemargin=-26.46106pt
+* \evensidemargin=-26.46106pt
+* \topmargin=-2.51526pt
+* \headheight=12.0pt
+* \headsep=25.0pt
+* \topskip=10.0pt
+* \footskip=30.0pt
+* \marginparwidth=65.0pt
+* \marginparsep=11.0pt
+* \columnsep=10.0pt
+* \skip\footins=9.0pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidefalse
+* \@mparswitchfalse
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+LaTeX Font Info:    Trying to load font information for U+msa on input line 41.
+
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 40.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 41.
 
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
@@ -223,86 +280,64 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 
 LaTeX Font Warning: Font shape `OT1/rsfs10/m/it' undefined
-(Font)              using `OT1/rsfs10/m/n' instead on input line 50.
+(Font)              using `OT1/rsfs10/m/n' instead on input line 51.
 
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (8.28452pt too wide) in paragraph at lines 98--99
-\OT1/cmr/m/it/10 la-tion $\OML/cmm/m/it/10 A \OT1/cmr/m/n/10 = (\OML/cmm/m/it/1
-0 A[]; :::; A[]\OT1/cmr/m/n/10 ) \OMS/cmsy/m/n/10 ^^X \OML/cmm/m/it/10 B \OT1/c
-mr/m/n/10 = (\OML/cmm/m/it/10 B[]; :::; B[]\OT1/cmr/m/n/10 )[]$\OT1/cmr/m/it/10
- . 
+Overfull \hbox (29.01176pt too wide) in paragraph at lines 99--100
+\OT1/cmr/m/it/10 seen as the quo-tient set of $\OML/cmm/m/it/10 Seq\OT1/cmr/m/n
+/10 ([])$ \OT1/cmr/m/it/10 by the re-la-tion $\OML/cmm/m/it/10 A \OT1/cmr/m/n/1
+0 = (\OML/cmm/m/it/10 A[]; :::; A[]\OT1/cmr/m/n/10 ) \OMS/cmsy/m/n/10 ^^X \OML/
+cmm/m/it/10 B \OT1/cmr/m/n/10 = (\OML/cmm/m/it/10 B[]; :::; B[]\OT1/cmr/m/n/10 
+)[]$\OT1/cmr/m/it/10 . 
  []
 
 
-Overfull \hbox (75.3673pt too wide) in paragraph at lines 102--103
-\OT1/cmr/m/it/10 by the re-la-tion $\OML/cmm/m/it/10 A \OT1/cmr/m/n/10 = (\OML/
-cmm/m/it/10 A[]; :::; A[]\OT1/cmr/m/n/10 ) \OMS/cmsy/m/n/10 ^^X \OML/cmm/m/it/1
-0 B \OT1/cmr/m/n/10 = (\OML/cmm/m/it/10 B[]; :::; B[]\OT1/cmr/m/n/10 )[]$\OT1/c
-mr/m/it/10 . 
- []
-
-
-Overfull \hbox (3.64825pt too wide) in paragraph at lines 110--111
-[]\OT1/cmr/m/it/10 A spec-i-fi-ca-tion of a class of com-bi-na-to-rial struc-
+Overfull \hbox (88.81128pt too wide) in paragraph at lines 103--104
+\OT1/cmr/m/it/10 can be seen as the quo-tient set of $\OML/cmm/m/it/10 Seq\OT1/
+cmr/m/n/10 ([])$ \OT1/cmr/m/it/10 by the re-la-tion $\OML/cmm/m/it/10 A \OT1/cm
+r/m/n/10 = (\OML/cmm/m/it/10 A[]; :::; A[]\OT1/cmr/m/n/10 ) \OMS/cmsy/m/n/10 ^^
+X \OML/cmm/m/it/10 B \OT1/cmr/m/n/10 = (\OML/cmm/m/it/10 B[]; :::; B[]\OT1/cmr/
+m/n/10 )[]$\OT1/cmr/m/it/10 . 
  []
 
 [2]
-Overfull \hbox (1.15646pt too wide) in paragraph at lines 121--122
-[]\OT1/cmr/m/it/10 A la-belled class \OT1/rsfs10/m/it/10 C \OT1/cmr/m/it/10 is 
-a class
- []
-
-
-Overfull \hbox (5.21309pt too wide) in paragraph at lines 130--131
-[]\OT1/cmr/m/it/10 Let \OT1/rsfs10/m/it/10 C \OT1/cmr/m/it/10 be
- []
-
-
-Overfull \hbox (8.41148pt too wide) in paragraph at lines 143--144
-[]\OT1/cmr/m/it/10 Let \OT1/rsfs10/m/it/10 A \OT1/cmr/m/it/10 and
- []
-
-[3{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
-Underfull \hbox (badness 10000) in paragraph at lines 184--187
+Underfull \hbox (badness 10000) in paragraph at lines 185--188
 
  []
 
-[4] [5]
-Overfull \hbox (21.42921pt too wide) in paragraph at lines 245--245
-[]\OT1/cmr/bx/n/12 The li-brary Us-ain-boltz (Uni-form SAm-plINg with BOLTZ-
- []
-
-
-Overfull \hbox (2.48962pt too wide) in paragraph at lines 256--257
-[]\OT1/cmr/m/it/10 To bet-ter un-der-stand how the us-
- []
-
+[3{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-ts1.enc}] [4]
 LaTeX Font Info:    Trying to load font information for OMS+cmr on input line 2
-63.
+64.
+
 (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/it' in size <8> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 263.
- [6] [7] [8]
-LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <8> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 367.
- [9]
-Overfull \hbox (15.23166pt too wide) detected at line 414
-[]
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 264.
+ [5]
+Overfull \hbox (24.05898pt too wide) in paragraph at lines 319--321
+\OT1/cmr/m/it/10 where $\OT1/cmr/m/n/10 	[]\OML/cmm/m/it/10 ; :::; \OT1/cmr/m/n
+/10 	[]$ \OT1/cmr/m/it/10 are func-tions which only use the op-er-a-tor and ba-
+sic class: $\OML/cmm/m/it/10 Atom\OT1/cmr/m/n/10 ()\OML/cmm/m/it/10 ; Zero\OT1/
+cmr/m/n/10 ()\OML/cmm/m/it/10 ; Epsilon\OT1/cmr/m/n/10 ()\OML/cmm/m/it/10 ; \OT
+1/cmr/m/n/10 +\OML/cmm/m/it/10 ; \OMS/cmsy/m/n/10 ^^B\OML/cmm/m/it/10 ; Seq; Se
+t; Cycle$\OT1/cmr/m/it/10 . 
  []
 
+[6]
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <8> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 368.
+ [7]
 LaTeX Font Info:    Trying to load font information for OML+cmr on input line 4
-19.
-(/usr/share/texlive/texmf-dist/tex/latex/base/omlcmr.fd
+20.
+ (/usr/share/texlive/texmf-dist/tex/latex/base/omlcmr.fd
 File: omlcmr.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <8> not available
-(Font)              Font shape `OML/cmm/m/it' tried instead on input line 419.
- [10] (./rds.bbl)
-[11] (./rds.aux)
+(Font)              Font shape `OML/cmm/m/it' tried instead on input line 420.
+ [8] (./rds.bbl) [9] (./rds.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -313,13 +348,13 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 3724 strings out of 474222
- 52998 string characters out of 5748733
- 2315975 words of memory out of 5000000
- 25949 multiletter control sequences out of 15000+600000
+ 4279 strings out of 474222
+ 61422 string characters out of 5748733
+ 2349975 words of memory out of 5000000
+ 26493 multiletter control sequences out of 15000+600000
  569539 words of font info for 79 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 56i,10n,65p,624b,1830s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 57i,10n,65p,624b,1830s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
 e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></usr/share/texli
@@ -345,10 +380,10 @@ mbols/msbm7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/rsfs/rsfs10.p
 fb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0800.pfb></usr/share/texmf
 /fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texmf/fonts/type1/public/
 cm-super/sfti0800.pfb>
-Output written on rds.pdf (11 pages, 318579 bytes).
+Output written on rds.pdf (9 pages, 317647 bytes).
 PDF statistics:
- 177 PDF objects out of 1000 (max. 8388607)
- 108 compressed objects within 2 object streams
+ 171 PDF objects out of 1000 (max. 8388607)
+ 104 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
